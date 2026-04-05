@@ -3360,16 +3360,52 @@ def generate_mapbox_base_html(
       newFlights.forEach(function(f) {{ FLIGHTS.push(f); }});
       _dataFetchTs = Math.floor(Date.now() / 1000);
 
-      // Record "to" keyframe — new API positions
+      // Record "to" keyframe — new API positions.
+      // Guard against backwards animation: if the new API position is behind the
+      // current dead-reckoned position along the flight's heading, the aircraft
+      // would visually reverse.  We detect this with a dot-product check and, when
+      // it fires, keep the current interpolated position as the tween target so the
+      // aircraft holds its position and only re-syncs heading and speed.
       FLIGHTS.forEach(function(f) {{
         const from = _interpFrom[f.icao24];
-        _interpTo[f.icao24] = {{ lat: f.lat, lng: f.lng, heading: f.heading || 0 }};
         // Seed _iLat/_iLng so first frame doesn't jump if this is a new aircraft
         if (!from) {{
           _interpFrom[f.icao24] = {{ lat: f.lat, lng: f.lng, heading: f.heading || 0 }};
+          _interpTo[f.icao24]   = {{ lat: f.lat, lng: f.lng, heading: f.heading || 0 }};
           f._iLat     = f.lat;
           f._iLng     = f.lng;
           f._iHeading = f.heading || 0;
+          return;
+        }}
+
+        const newLat = f.lat;
+        const newLng = f.lng;
+        const newHdg = f.heading || 0;
+
+        // Vector from current interp position to new API position
+        const dLat = newLat - from.lat;
+        const dLng = newLng - from.lng;
+
+        // Current heading as unit vector (lat/lng plane, lng corrected for latitude)
+        const hdgRad = (from.heading * Math.PI) / 180;
+        const cosLat = Math.cos((from.lat * Math.PI) / 180) || 1;
+        const hLat = Math.cos(hdgRad);
+        const hLng = Math.sin(hdgRad) * cosLat;
+
+        // Dot product of displacement with heading vector
+        const dot = dLat * hLat + dLng * hLng;
+
+        // Great-circle distance² (rough, in degrees²) to detect large teleports
+        const dist2 = dLat * dLat + dLng * dLng;
+
+        if (dot < 0 && dist2 < 0.25) {{
+          // New position is behind current position by less than ~55 km:
+          // this is dead-reckoning overshoot — DO NOT animate backwards.
+          // Keep the current interpolated position as the target, just update heading.
+          _interpTo[f.icao24] = {{ lat: from.lat, lng: from.lng, heading: newHdg }};
+        }} else {{
+          // Normal case: new position is ahead (or a real large position change) — tween to it.
+          _interpTo[f.icao24] = {{ lat: newLat, lng: newLng, heading: newHdg }};
         }}
       }});
 
