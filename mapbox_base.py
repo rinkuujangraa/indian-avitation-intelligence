@@ -6252,6 +6252,13 @@ def generate_mapbox_base_html(
         }}
       }}, 12000);
 
+      // Helper: addLayer before 'flights-circles' only if that layer exists.
+      // Avoids "Layer does not exist" when addLayer is called before initFlights runs.
+      function _addLayerBeforeFlights(map, layerDef) {{
+        const before = map.getLayer('flights-circles') ? 'flights-circles' : undefined;
+        map.addLayer(layerDef, before);
+      }}
+
       function _runMapInit() {{
         try {{
           if (typeof map.setFog === 'function') {{
@@ -6334,7 +6341,7 @@ def generate_mapbox_base_html(
           lineMetrics: true,
         }});
         // Glow (wide, faint)
-        map.addLayer({{
+        _addLayerBeforeFlights(map, {{
           id: 'trails-glow',
           type: 'line',
           source: 'trails-src',
@@ -6344,9 +6351,9 @@ def generate_mapbox_base_html(
             'line-opacity': 0.08,
             'line-blur': 4,
           }},
-        }}, 'flights-circles');
+        }});
         // Main trail
-        map.addLayer({{
+        _addLayerBeforeFlights(map, {{
           id: 'trails-line',
           type: 'line',
           source: 'trails-src',
@@ -6360,7 +6367,7 @@ def generate_mapbox_base_html(
               1, 'rgba(0,229,255,0.85)'],
           }},
           layout: {{ 'line-cap': 'round', 'line-join': 'round' }},
-        }}, 'flights-circles');
+        }});
       }}
 
       function setTrailsVisible(map, visible) {{
@@ -6839,12 +6846,12 @@ def generate_mapbox_base_html(
           tileSize: 256,
           attribution: 'RainViewer',
         }});
-        map.addLayer({{
+        _addLayerBeforeFlights(map, {{
           id: 'rain-layer',
           type: 'raster',
           source: 'rain-src',
           paint: {{ 'raster-opacity': 0.55 }},
-        }}, 'flights-circles');
+        }});
       }}
 
       function setWeatherVisible(map, visible) {{
@@ -6895,7 +6902,7 @@ def generate_mapbox_base_html(
             type: 'geojson',
             data: {{ type: 'FeatureCollection', features }},
           }});
-          map.addLayer({{
+          _addLayerBeforeFlights(map, {{
             id: 'heat-layer',
             type: 'heatmap',
             source: 'heat-src',
@@ -6914,7 +6921,7 @@ def generate_mapbox_base_html(
               ],
               'heatmap-opacity': 0.75,
             }},
-          }}, 'flights-circles');
+          }});
         }} else {{
           if (btn) btn.classList.remove('active');
           if (map.getLayer('heat-layer')) map.setLayoutProperty('heat-layer', 'visibility', 'none');
@@ -6955,7 +6962,7 @@ def generate_mapbox_base_html(
             return;
           }}
           map.addSource('delay-map-src', {{ type: 'geojson', data: {{ type: 'FeatureCollection', features }} }});
-          map.addLayer({{
+          _addLayerBeforeFlights(map, {{
             id: 'delay-map-layer',
             type: 'circle',
             source: 'delay-map-src',
@@ -6972,7 +6979,7 @@ def generate_mapbox_base_html(
               'circle-stroke-width': 1,
               'circle-stroke-color': 'rgba(0,0,0,0.4)',
             }},
-          }}, 'flights-circles');
+          }});
           map.addLayer({{
             id: 'delay-map-labels',
             type: 'symbol',
