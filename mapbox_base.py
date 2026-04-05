@@ -3161,27 +3161,36 @@ def generate_mapbox_base_html(
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        max-height: 72vh !important;
-        min-height: 0;
+        /* Use 65vh so there's always map visible above */
+        height: 65vh !important;
+        max-height: 65vh !important;
+        min-height: 0 !important;
+        /* MUST be scroll not auto — auto can collapse on iOS */
+        overflow-y: scroll !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior-y: contain !important;
+        touch-action: pan-y !important;
         border-radius: 20px 20px 0 0 !important;
         border-left: none !important;
         border-right: none !important;
         border-bottom: none !important;
-        touch-action: pan-y;
-        overscroll-behavior-y: contain;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: env(safe-area-inset-bottom, 0px);
+        /* Extra bottom padding so last content clears home-bar */
+        padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
       }}
-      /* Drag handle above bottom sheet */
+      /* Drag handle — separate element ABOVE scroll area using padding trick */
       .right-panel::before {{
         content: '';
         display: block;
         width: 40px;
         height: 4px;
         border-radius: 999px;
-        background: rgba(255,255,255,0.20);
-        margin: 10px auto 0;
+        background: rgba(255,255,255,0.22);
+        margin: 10px auto 4px;
         flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        z-index: 2;
       }}
       /* Make inner content fit full width */
       .panel-inner {{
