@@ -3152,7 +3152,8 @@ def generate_mapbox_base_html(
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        max-height: 72vh !important;
+        /* dvh = dynamic viewport height — excludes browser chrome (address bar, bottom bar) */
+        max-height: min(72dvh, 72vh) !important;
         min-height: 0;
         border-radius: 20px 20px 0 0 !important;
         border-left: none !important;
@@ -3161,22 +3162,28 @@ def generate_mapbox_base_html(
         touch-action: pan-y;
         overscroll-behavior-y: contain;
         -webkit-overflow-scrolling: touch;
-        padding-bottom: env(safe-area-inset-bottom, 0px);
+        overflow-y: scroll !important;
+        overflow-x: hidden !important;
+        /* hide the scrollbar track — the drag handle shows scroll intent */
+        scrollbar-width: none !important;
       }}
-      /* Drag handle above bottom sheet */
+      .right-panel::-webkit-scrollbar {{
+        display: none !important;
+      }}
+      /* Drag handle pill */
       .right-panel::before {{
         content: '';
         display: block;
         width: 40px;
         height: 4px;
         border-radius: 999px;
-        background: rgba(255,255,255,0.20);
-        margin: 10px auto 0;
+        background: rgba(255,255,255,0.22);
+        margin: 10px auto 4px;
         flex-shrink: 0;
       }}
-      /* Make inner content fit full width */
+      /* Inner content: tighter padding + safe-area bottom gap */
       .panel-inner {{
-        padding: 12px 14px 16px !important;
+        padding: 10px 14px calc(env(safe-area-inset-bottom, 12px) + 24px) !important;
       }}
       .panel-flight-hero {{
         font-size: 28px !important;
@@ -3197,11 +3204,12 @@ def generate_mapbox_base_html(
         flex-direction: column !important;
         gap: 8px !important;
       }}
-      /* Make close button bigger and easier to tap */
+      /* Close button — easy to tap */
       .panel-close {{
         width: 40px !important;
         height: 40px !important;
         font-size: 22px !important;
+        flex-shrink: 0 !important;
       }}
       /* Sparkline full width */
       .sparkline-card {{
