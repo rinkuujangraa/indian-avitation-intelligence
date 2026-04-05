@@ -3057,6 +3057,69 @@ def generate_mapbox_base_html(
       .fids-table {{ color: #000 !important; }}
       .fids-close-btn, #fids-print-btn {{ display: none !important; }}
     }}
+    /* ── Flight board mobile (≤600px) ──────────────────────────────── */
+    @media (max-width: 600px) {{
+      /* Toolbar: stack title on top, filters below */
+      .fids-toolbar {{
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 12px 8px;
+      }}
+      .fids-title {{
+        width: 100%;
+        font-size: 11px;
+      }}
+      .fids-filter-group {{
+        flex: 1;
+        gap: 4px;
+      }}
+      .fids-filter-btn {{
+        font-size: 10px;
+        padding: 5px 10px;
+      }}
+      /* Hide print button on mobile */
+      #fids-print-btn {{ display: none; }}
+      /* Make close button bigger */
+      .fids-close-btn {{
+        width: 38px;
+        height: 38px;
+        font-size: 22px;
+      }}
+      /* Hide hint — wastes vertical space */
+      .fids-col-hint {{ display: none; }}
+      /* Hide non-essential columns: Airline, STA, ETA, AFRI, Phase, Wx, Speed */
+      .fids-table thead th:nth-child(2),
+      .fids-table tbody td:nth-child(2),
+      .fids-table thead th:nth-child(5),
+      .fids-table tbody td:nth-child(5),
+      .fids-table thead th:nth-child(6),
+      .fids-table tbody td:nth-child(6),
+      .fids-table thead th:nth-child(9),
+      .fids-table tbody td:nth-child(9),
+      .fids-table thead th:nth-child(10),
+      .fids-table tbody td:nth-child(10),
+      .fids-table thead th:nth-child(11),
+      .fids-table tbody td:nth-child(11),
+      .fids-table thead th:nth-child(12),
+      .fids-table tbody td:nth-child(12) {{
+        display: none;
+      }}
+      /* Tighter cells for remaining: Flight, Origin, Dest, Delay, Status */
+      .fids-table thead th,
+      .fids-row td {{
+        padding: 6px 8px;
+        font-size: 11px;
+      }}
+      .fids-flight {{ font-size: 12px; }}
+      .fids-footer {{ font-size: 10px; padding: 5px 12px; }}
+      /* Ensure table-wrap fills remaining height */
+      .fids-table-wrap {{
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        overscroll-behavior-y: contain;
+      }}
+    }}
+
     /* ── Phone layout (≤600px) ──────────────────────────────────────── */
     @media (max-width: 600px) {{
       html, body {{ height: 100vh !important; overflow: hidden; }}
