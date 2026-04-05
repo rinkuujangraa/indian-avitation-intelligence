@@ -1229,10 +1229,6 @@ def generate_mapbox_base_html(
       from {{ opacity: 0; transform: translateX(18px) scale(0.97); }}
       to   {{ opacity: 1; transform: translateX(0) scale(1); }}
     }}
-    @keyframes rpSlideDown {{
-      from {{ opacity: 0; transform: translateY(-24px) scale(0.98); }}
-      to   {{ opacity: 1; transform: translateY(0) scale(1); }}
-    }}
     @keyframes rpSlideUp {{
       from {{ opacity: 0; transform: translateY(100%); }}
       to   {{ opacity: 1; transform: translateY(0); }}
@@ -1248,7 +1244,7 @@ def generate_mapbox_base_html(
     }}
     @media (max-width: 600px) {{
       .right-panel.rp-visible {{
-        animation: rpSlideDown 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation: rpSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
       }}
     }}
     .right-panel {{
@@ -3063,30 +3059,28 @@ def generate_mapbox_base_html(
     }}
     /* ── Phone layout (≤600px) ──────────────────────────────────────── */
     @media (max-width: 600px) {{
-      html, body {{ height: 100% !important; overflow: hidden; }}
-      #stage {{ height: 100% !important; }}
-
+      html, body {{ height: 100vh !important; overflow: hidden; }}
+      #stage {{ height: 100vh !important; }}
       /* Brand: icon-only pill */
       .brand-panel {{
         min-width: 0;
-        width: 44px;
-        padding: 6px;
-        border-radius: 14px;
+        width: 52px;
+        padding: 8px;
+        border-radius: 16px;
         top: 8px;
         left: 8px;
         justify-content: center;
         gap: 0;
       }}
       .brand-copy {{ display: none; }}
-      .brand-mark {{ width: 32px; height: 32px; font-size: 20px; border-radius: 10px; flex-shrink: 0; }}
-
-      /* Module + search strip — full width excluding brand icon */
+      .brand-mark {{ width: 36px; height: 36px; font-size: 22px; border-radius: 12px; flex-shrink: 0; }}
+      /* Module + search strip */
       .top-center-stack {{
         top: 8px;
-        left: 60px;
-        right: 8px;
+        left: 68px;
+        right: 78px;
         align-items: stretch;
-        gap: 4px;
+        gap: 5px;
       }}
       #top-stats {{ display: none; }}
       .module-strip {{
@@ -3104,9 +3098,9 @@ def generate_mapbox_base_html(
       .module-btn {{
         white-space: nowrap;
         flex-shrink: 0;
-        padding: 5px 10px;
-        font-size: 10px;
-        border-radius: 9px;
+        padding: 6px 11px;
+        font-size: 11px;
+        border-radius: 10px;
         min-width: 0;
       }}
       .top-center-stack .search-wrap {{
@@ -3114,105 +3108,64 @@ def generate_mapbox_base_html(
         width: 100%;
       }}
       .search-shell {{
-        height: 36px;
+        height: 38px;
         min-width: 0;
-        border-radius: 11px;
+        border-radius: 12px;
       }}
-
-      /* Top-actions: become a full-width tool strip below module+search */
+      /* Top-actions: freshness badge only */
       .top-actions {{
-        top: 95px;
-        left: 0;
-        right: 0;
-        flex-direction: row;
-        align-items: center;
+        top: 8px;
+        right: 8px;
         gap: 0;
-        padding: 4px 8px;
-        background: rgba(8,12,18,0.93);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-        z-index: 60;
-        overflow: hidden;
+        align-items: flex-end;
       }}
-      .tools-row-status {{
-        flex-shrink: 0;
-        margin-right: 6px;
-      }}
-      .ac-filter-strip {{ display: none !important; }}
+      .ac-filter-strip,
+      .tools-strip {{ display: none; }}
       #freshness-badge {{
-        font-size: 9px;
-        padding: 4px 7px;
-        border-radius: 9px;
-        white-space: nowrap;
+        font-size: 10px;
+        padding: 5px 9px;
+        border-radius: 12px;
       }}
-      /* Show tools strip as horizontal scroll */
-      .tools-strip {{
-        display: flex !important;
-        flex: 1;
-        overflow-x: auto;
-        overflow-y: hidden;
-        flex-wrap: nowrap;
-        gap: 4px;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-        touch-action: pan-x;
-        overscroll-behavior-x: contain;
-        justify-content: flex-start;
-        max-width: none;
-      }}
-      .tools-strip::-webkit-scrollbar {{ display: none; }}
-      .tool-btn {{
-        white-space: nowrap;
-        flex-shrink: 0;
-        font-size: 11px;
-        padding: 7px 11px;
-        border-radius: 9px;
-        min-height: 34px;
-        display: inline-flex;
-        align-items: center;
-      }}
-
-      /* Left rail: horizontal scroll strip — anchored below tool bar */
+      /* Left rail: horizontal bottom drawer */
       .left-rail {{
-        top: 133px;
-        bottom: auto;
+        top: auto;
+        bottom: 0;
         left: 0;
         right: 0;
         width: 100%;
-        max-height: 112px;
+        max-height: 280px;
         flex-direction: row;
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
         touch-action: pan-x;
         overscroll-behavior-x: contain;
-        border-radius: 0;
-        padding: 6px 8px;
+        border-radius: 16px 16px 0 0;
+        padding: 10px 8px 12px;
         gap: 8px;
         max-width: 100%;
-        background: linear-gradient(180deg, rgba(10,14,22,0.97), rgba(8,12,18,0.95));
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-        box-shadow: none;
-        border-top: none;
+        background: linear-gradient(180deg, rgba(10,14,22,0.98), rgba(8,12,18,0.98));
+        border-top: 1px solid rgba(255,255,255,0.10);
+        box-shadow: 0 -12px 32px rgba(0,0,0,0.4);
       }}
       .left-rail .rail-card {{
         flex-shrink: 0;
-        width: 210px;
-        min-width: 175px;
-        padding: 9px 11px;
+        width: 220px;
+        min-width: 180px;
       }}
-
-      /* Right panel: bottom sheet — works correctly once iframe is right height */
+      /* Right panel: full-width bottom sheet */
       .right-panel {{
+        /* Bottom sheet: anchored to the bottom of the iframe.
+           Works correctly because DASHBOARD_HEIGHT = 680px on mobile,
+           so bottom:0 is within the visible phone screen. */
         top: auto !important;
         bottom: 0 !important;
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        height: 52vh !important;
-        max-height: 52vh !important;
+        height: 72% !important;
+        max-height: 72% !important;
         min-height: 0;
         border-radius: 20px 20px 0 0 !important;
         border-left: none !important;
@@ -3223,138 +3176,69 @@ def generate_mapbox_base_html(
         touch-action: pan-y !important;
         overscroll-behavior-y: contain !important;
         -webkit-overflow-scrolling: touch !important;
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px) !important;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px) !important;
       }}
       /* Drag handle pill */
       .right-panel::before {{
-        content: '' !important;
-        display: block !important;
-        width: 36px;
+        content: '';
+        display: block;
+        width: 40px;
         height: 4px;
         border-radius: 999px;
-        background: rgba(255,255,255,0.22);
-        margin: 8px auto 4px;
+        background: rgba(255,255,255,0.25);
+        margin: 10px auto 6px;
         flex-shrink: 0;
         position: sticky;
         top: 0;
         z-index: 1;
       }}
-
-      /* Panel content */
+      /* Make inner content fit full width */
       .panel-inner {{
-        padding: 10px 12px 20px !important;
-      }}
-      /* Sticky header — close button always reachable while scrolling */
-      .panel-head-row {{
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 10 !important;
-        background: rgba(8,13,21,0.97) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
-        margin: 0 -12px 8px !important;
-        padding: 10px 12px 8px !important;
-        border-bottom: 1px solid rgba(255,255,255,0.07) !important;
-      }}
-      .panel-close {{
-        width: 44px !important;
-        height: 44px !important;
-        font-size: 22px !important;
-        border-radius: 12px !important;
-      }}
-      .follow-btn {{
-        padding: 8px 14px !important;
-        font-size: 11px !important;
-        border-radius: 10px !important;
-        min-height: 36px !important;
+        padding: 12px 14px 24px !important;
       }}
       .panel-flight-hero {{
-        font-size: 30px !important;
-      }}
-      .panel-chip-row {{
-        gap: 5px !important;
-        row-gap: 5px !important;
-      }}
-      .pchip {{
-        font-size: 11px !important;
-        padding: 5px 10px !important;
-      }}
-      .mcard {{
-        padding: 10px 12px !important;
-      }}
-      .mcard-label {{
-        font-size: 9px !important;
-        margin-bottom: 6px !important;
-      }}
-      .mcard-value {{
-        font-size: 16px !important;
-      }}
-      .metrics-grid-4 {{
-        grid-template-columns: 1fr 1fr !important;
-        gap: 7px !important;
-      }}
-      .route-display {{
-        gap: 8px !important;
-      }}
-      .route-apt-code {{
         font-size: 28px !important;
       }}
-      .route-apt-city {{
-        font-size: 12px !important;
+      /* 2-col metrics grid on phone */
+      .metrics-grid-4 {{
+        grid-template-columns: 1fr 1fr !important;
       }}
-      .delay-card {{
-        padding: 12px 14px !important;
+      /* Route display full width */
+      .route-display {{
+        gap: 6px !important;
       }}
+      .route-apt-code {{
+        font-size: 26px !important;
+      }}
+      /* Delay section full width */
       .delay-row {{
         flex-direction: column !important;
         gap: 8px !important;
       }}
-      .afri-card {{
-        padding: 12px 14px !important;
+      /* Make close button bigger and easier to tap */
+      .panel-close {{
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 22px !important;
       }}
+      /* Sparkline full width */
       .sparkline-card {{
         margin: 0 !important;
       }}
-      .pos-card {{
-        padding: 10px 12px !important;
-      }}
-      .panel-section-divider {{
-        margin: 12px 0 !important;
-      }}
-
-      /* Alert feed: full width, below tool bar */
+      /* Alert feed: full width */
       #alert-feed {{
-        right: 6px;
-        left: 6px;
-        top: 100px;
+        right: 8px;
+        left: 8px;
+        top: 108px;
         width: auto;
-        max-width: calc(100% - 12px);
-        pointer-events: auto;
+        max-width: calc(100% - 16px);
       }}
-
-      /* Filter panel: full width below tool bar */
-      .filter-panel {{
-        top: 133px !important;
-        left: 6px !important;
-        right: 6px !important;
-        width: auto !important;
-        max-width: calc(100% - 12px) !important;
-        touch-action: pan-y;
-        overscroll-behavior-y: contain;
-      }}
-
-      /* Alerts side panel: full-width drop-down from top */
-      .alerts-side-panel {{
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: auto !important;
-        width: 100% !important;
-        max-height: 55vh !important;
-        border-radius: 0 0 16px 16px !important;
-        border-left: none !important;
-        border-right: none !important;
-        border-top: none !important;
+      /* Filter and alerts panels: full width */
+      .filter-panel, .alerts-side-panel {{
+        left: 8px;
+        right: 8px;
+        width: auto;
+        max-width: calc(100% - 16px);
         touch-action: pan-y;
         overscroll-behavior-y: contain;
       }}
@@ -3552,29 +3436,6 @@ def generate_mapbox_base_html(
     let _dpThreshold = 0;   // delay prediction slider state — survives rail re-renders
     let ROUTE_SOURCE_READY = false;
     let USER_LOCATION_MARKER = null;
-
-    // ── Mobile iframe height fix ───────────────────────────────────────────────
-    // On mobile, Streamlit creates a 1080px tall iframe but phones only show the
-    // top ~550-700px. bottom:0 and vh units would land off-screen.
-    // We use Streamlit's setFrameHeight protocol to shrink the iframe to the actual
-    // phone screen size, so all positioning works correctly.
-    (function _fixMobileFrameHeight() {{
-      const isMobile = window.screen.width <= 768;
-      if (!isMobile) return;
-      // Compute a safe iframe height: physical screen minus browser chrome and
-      // Streamlit top bar (approx 140px total overhead).
-      const h = Math.max(520, window.screen.height - 140);
-      try {{
-        window.parent.postMessage({{ type: 'streamlit:setFrameHeight', height: h }}, '*');
-      }} catch(e) {{}}
-      // Re-send on resize (orientation change etc.)
-      window.addEventListener('resize', function() {{
-        try {{
-          const h2 = Math.max(520, window.screen.height - 140);
-          window.parent.postMessage({{ type: 'streamlit:setFrameHeight', height: h2 }}, '*');
-        }} catch(e) {{}}
-      }});
-    }})();
 
     // ── Speed / altitude filter state ─────────────────────────────────────────
     let _altMin = 0, _altMax = 45000;
@@ -4901,21 +4762,8 @@ def generate_mapbox_base_html(
       // Tapping the shield closes the panel (backdrop-dismiss UX).
       if (window.innerWidth <= 600) {{
         panel.scrollTop = 0;
-        // Compute how much of the iframe is actually visible on the phone screen.
-        // window.innerHeight = iframe height (may still be 1080 before postMessage resize).
-        // window.screen.height - 140 = actual phone screen minus browser chrome.
-        // Math.min picks the smallest = the truly visible area.
-        const _visH = Math.min(window.innerHeight, window.screen.height - 140);
-        const _panH = Math.round(_visH * 0.60);
-        const _panTop = _visH - _panH;
-        panel.style.top = _panTop + 'px';
-        panel.style.bottom = 'auto';
-        panel.style.height = _panH + 'px';
-        panel.style.maxHeight = _panH + 'px';
         const shield = document.getElementById('map-shield');
         if (shield) {{
-          shield.style.top = '0';
-          shield.style.height = _panTop + 'px';
           shield.style.display = 'block';
           shield.onclick = function() {{ hideRightPanel(); }};
         }}
@@ -5191,18 +5039,10 @@ def generate_mapbox_base_html(
       if (!panel) return;
       panel.classList.remove('rp-visible');
       panel.style.display = 'none';
-      panel.style.top = '';
-      panel.style.bottom = '';
-      panel.style.height = '';
-      panel.style.maxHeight = '';
       panel.innerHTML = '';
       _cameraFollow = false;
       const shield = document.getElementById('map-shield');
-      if (shield) {{
-        shield.style.display = 'none';
-        shield.style.top = '';
-        shield.style.height = '';
-      }}
+      if (shield) shield.style.display = 'none';
     }}
 
     // ── SDF icon registration ──────────────────────────────────────────────────

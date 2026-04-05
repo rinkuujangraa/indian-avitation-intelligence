@@ -116,7 +116,15 @@ st.markdown(
 )
 
 
-DASHBOARD_HEIGHT = 1080
+# Detect mobile via User-Agent so the iframe fits on a phone screen.
+# On phones the iframe must be ≤ screen height; otherwise bottom:0 positioned
+# elements end up off-screen and the panel is invisible/unreachable.
+try:
+    _ua = (st.context.headers.get("User-Agent", "") or "").lower()
+except Exception:
+    _ua = ""
+_is_mobile = any(k in _ua for k in ("mobile", "android", "iphone", "ipod"))
+DASHBOARD_HEIGHT = 680 if _is_mobile else 1080
 
 
 @st.cache_data(ttl=60, show_spinner=False)
