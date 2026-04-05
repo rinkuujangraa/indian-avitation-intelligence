@@ -61,6 +61,14 @@ st.set_page_config(
 
 st.markdown(
     """
+<script>document.title = "Aviation Intelligence \u00b7 India Live Flight Tracker";</script>
+<meta property="og:title" content="Aviation Intelligence \u00b7 India Live Flight Tracker" />
+<meta property="og:description" content="Live India flight tracking, ML delay prediction and airport analytics. Built with Python, Streamlit, and Mapbox." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Aviation Intelligence \u00b7 India Live Flight Tracker" />
+<meta name="twitter:description" content="Live India flight tracking, ML delay prediction and airport analytics." />
+<meta name="description" content="Live India flight tracking, ML delay prediction and airport analytics. Built with Python, Streamlit, and Mapbox." />
 <style>
   [data-testid="stSidebar"],
   [data-testid="stToolbar"],
