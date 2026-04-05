@@ -3161,10 +3161,9 @@ def generate_mapbox_base_html(
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        /* Height is set dynamically via JS (window.top.innerHeight) so it fits
-           the real device screen, not the 1080px Streamlit iframe. Fallback below. */
-        height: 520px !important;
-        max-height: 520px !important;
+        /* Height set dynamically by JS. Fallback used if JS fails. */
+        height: 640px !important;
+        max-height: 640px !important;
         min-height: 0;
         border-radius: 20px 20px 0 0 !important;
         border-left: none !important;
@@ -4764,8 +4763,11 @@ def generate_mapbox_base_html(
         panel.scrollTop = 0;
         // Use the real device screen height (window.top = Streamlit parent page),
         // NOT window.innerHeight which equals the 1080px iframe height.
-        let _ph = 520;
-        try {{ _ph = Math.round(window.top.innerHeight * 0.68); }} catch(e) {{}}
+        let _ph = 640;
+        try {{ _ph = Math.round(window.top.innerHeight * 0.80); }} catch(e) {{
+          // window.top cross-origin blocked — use screen.height (CSS px, always readable)
+          try {{ _ph = Math.round(window.screen.height * 0.78); }} catch(e2) {{}}
+        }}
         panel.style.height = _ph + 'px';
         panel.style.maxHeight = _ph + 'px';
         const shield = document.getElementById('map-shield');
