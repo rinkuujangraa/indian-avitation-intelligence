@@ -130,55 +130,7 @@ st.markdown(
   #stDecoration {
     display: none !important;
   }
-  /* splash screen: shown instantly, fades out once app hydrates */
-  #avi-splash {
-    position: fixed; inset: 0; z-index: 99999;
-    background: #030810;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
-    transition: opacity 0.5s ease;
-  }
-  #avi-splash.hidden { opacity: 0; pointer-events: none; }
-  #avi-splash .splash-icon { font-size: 52px; animation: splashPulse 1.6s ease infinite; }
-  #avi-splash .splash-title { font-family: "Inter","SF Pro Display",sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.03em; color: #eef3fa; }
-  #avi-splash .splash-sub { font-family: "Inter","SF Pro Display",sans-serif; font-size: 13px; color: rgba(238,243,250,0.45); }
-  #avi-splash .splash-bar { width: 160px; height: 3px; background: rgba(255,255,255,0.10); border-radius: 999px; overflow: hidden; }
-  #avi-splash .splash-bar-fill { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg,#ffcf34,#bcff5c); animation: splashLoad 2.4s cubic-bezier(.4,0,.2,1) forwards; }
-  @keyframes splashPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
-  @keyframes splashLoad  { 0%{width:0;} 60%{width:75%;} 85%{width:90%;} 100%{width:100%;} }
 </style>
-<div id="avi-splash">
-  <div class="splash-icon">✈️</div>
-  <div class="splash-title">Aviation Intelligence</div>
-  <div class="splash-sub">Loading India airspace…</div>
-  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
-</div>
-<script>
-  // Hide splash once Streamlit has mounted the app
-  (function() {
-    var splash = document.getElementById("avi-splash");
-    function hideSplash() {
-      splash.classList.add("hidden");
-      setTimeout(function() { if (splash && splash.parentNode) splash.parentNode.removeChild(splash); }, 600);
-    }
-    // Check for any Streamlit content mounting
-    function tryHide() {
-      var indicators = [
-        document.querySelector('[data-testid="stApp"]'),
-        document.querySelector('[data-testid="stVerticalBlock"]'),
-        document.querySelector('[data-testid="stHtml"]'),
-        document.querySelector('.stApp iframe'),
-        document.querySelector('iframe[title]')
-      ];
-      for (var i = 0; i < indicators.length; i++) {
-        if (indicators[i]) { hideSplash(); return; }
-      }
-      requestAnimationFrame(tryHide);
-    }
-    // Hard fallback: always hide after 5 seconds no matter what
-    setTimeout(hideSplash, 5000);
-    setTimeout(tryHide, 600);
-  })();
-</script>
 """,
     unsafe_allow_html=True,
 )
