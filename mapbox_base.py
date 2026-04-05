@@ -3161,9 +3161,10 @@ def generate_mapbox_base_html(
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        /* Fixed height so overflow-y:scroll works — avoid 72vh shrink issues */
-        height: 72svh !important;
-        max-height: 72svh !important;
+        /* Height is set dynamically via JS (window.top.innerHeight) so it fits
+           the real device screen, not the 1080px Streamlit iframe. Fallback below. */
+        height: 520px !important;
+        max-height: 520px !important;
         min-height: 0;
         border-radius: 20px 20px 0 0 !important;
         border-left: none !important;
@@ -4761,6 +4762,12 @@ def generate_mapbox_base_html(
       // Tapping the shield closes the panel (backdrop-dismiss UX).
       if (window.innerWidth <= 600) {{
         panel.scrollTop = 0;
+        // Use the real device screen height (window.top = Streamlit parent page),
+        // NOT window.innerHeight which equals the 1080px iframe height.
+        let _ph = 520;
+        try {{ _ph = Math.round(window.top.innerHeight * 0.68); }} catch(e) {{}}
+        panel.style.height = _ph + 'px';
+        panel.style.maxHeight = _ph + 'px';
         const shield = document.getElementById('map-shield');
         if (shield) {{
           shield.style.display = 'block';
@@ -5038,6 +5045,8 @@ def generate_mapbox_base_html(
       if (!panel) return;
       panel.classList.remove('rp-visible');
       panel.style.display = 'none';
+      panel.style.height = '';
+      panel.style.maxHeight = '';
       panel.innerHTML = '';
       _cameraFollow = false;
       const shield = document.getElementById('map-shield');
