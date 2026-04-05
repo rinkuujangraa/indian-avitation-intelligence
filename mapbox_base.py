@@ -3063,28 +3063,30 @@ def generate_mapbox_base_html(
     }}
     /* ── Phone layout (≤600px) ──────────────────────────────────────── */
     @media (max-width: 600px) {{
-      html, body {{ height: 100vh !important; overflow: hidden; }}
-      #stage {{ height: 100vh !important; }}
+      html, body {{ height: 100% !important; overflow: hidden; }}
+      #stage {{ height: 100% !important; }}
+
       /* Brand: icon-only pill */
       .brand-panel {{
         min-width: 0;
-        width: 52px;
-        padding: 8px;
-        border-radius: 16px;
+        width: 44px;
+        padding: 6px;
+        border-radius: 14px;
         top: 8px;
         left: 8px;
         justify-content: center;
         gap: 0;
       }}
       .brand-copy {{ display: none; }}
-      .brand-mark {{ width: 36px; height: 36px; font-size: 22px; border-radius: 12px; flex-shrink: 0; }}
-      /* Module + search strip */
+      .brand-mark {{ width: 32px; height: 32px; font-size: 20px; border-radius: 10px; flex-shrink: 0; }}
+
+      /* Module + search strip — full width excluding brand icon */
       .top-center-stack {{
         top: 8px;
-        left: 68px;
-        right: 78px;
+        left: 60px;
+        right: 8px;
         align-items: stretch;
-        gap: 5px;
+        gap: 4px;
       }}
       #top-stats {{ display: none; }}
       .module-strip {{
@@ -3102,9 +3104,9 @@ def generate_mapbox_base_html(
       .module-btn {{
         white-space: nowrap;
         flex-shrink: 0;
-        padding: 6px 11px;
-        font-size: 11px;
-        border-radius: 10px;
+        padding: 5px 10px;
+        font-size: 10px;
+        border-radius: 9px;
         min-width: 0;
       }}
       .top-center-stack .search-wrap {{
@@ -3112,126 +3114,191 @@ def generate_mapbox_base_html(
         width: 100%;
       }}
       .search-shell {{
-        height: 38px;
+        height: 36px;
         min-width: 0;
-        border-radius: 12px;
+        border-radius: 11px;
       }}
-      /* Top-actions: freshness badge only */
+
+      /* Top-actions: become a full-width tool strip below module+search */
       .top-actions {{
-        top: 8px;
-        right: 8px;
+        top: 95px;
+        left: 0;
+        right: 0;
+        flex-direction: row;
+        align-items: center;
         gap: 0;
-        align-items: flex-end;
+        padding: 4px 8px;
+        background: rgba(8,12,18,0.93);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        z-index: 60;
+        overflow: hidden;
       }}
-      .ac-filter-strip,
-      .tools-strip {{ display: none; }}
+      .tools-row-status {{
+        flex-shrink: 0;
+        margin-right: 6px;
+      }}
+      .ac-filter-strip {{ display: none !important; }}
       #freshness-badge {{
+        font-size: 9px;
+        padding: 4px 7px;
+        border-radius: 9px;
+        white-space: nowrap;
+      }}
+      /* Show tools strip as horizontal scroll */
+      .tools-strip {{
+        display: flex !important;
+        flex: 1;
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex-wrap: nowrap;
+        gap: 4px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        overscroll-behavior-x: contain;
+        justify-content: flex-start;
+        max-width: none;
+      }}
+      .tools-strip::-webkit-scrollbar {{ display: none; }}
+      .tool-btn {{
+        white-space: nowrap;
+        flex-shrink: 0;
         font-size: 10px;
         padding: 5px 9px;
-        border-radius: 12px;
+        border-radius: 8px;
       }}
-      /* Left rail: horizontal bottom drawer */
+
+      /* Left rail: horizontal scroll strip — anchored below tool bar */
       .left-rail {{
-        top: auto;
-        bottom: 0;
+        top: 133px;
+        bottom: auto;
         left: 0;
         right: 0;
         width: 100%;
-        max-height: 280px;
+        max-height: 112px;
         flex-direction: row;
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
         touch-action: pan-x;
         overscroll-behavior-x: contain;
-        border-radius: 16px 16px 0 0;
-        padding: 10px 8px 12px;
+        border-radius: 0;
+        padding: 6px 8px;
         gap: 8px;
         max-width: 100%;
-        background: linear-gradient(180deg, rgba(10,14,22,0.98), rgba(8,12,18,0.98));
-        border-top: 1px solid rgba(255,255,255,0.10);
-        box-shadow: 0 -12px 32px rgba(0,0,0,0.4);
+        background: linear-gradient(180deg, rgba(10,14,22,0.97), rgba(8,12,18,0.95));
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        box-shadow: none;
+        border-top: none;
       }}
       .left-rail .rail-card {{
         flex-shrink: 0;
-        width: 220px;
-        min-width: 180px;
+        width: 200px;
+        min-width: 170px;
+        padding: 8px 10px;
       }}
-      /* Right panel: full-width bottom sheet */
+
+      /* Right panel: bottom sheet — works correctly once iframe is right height */
       .right-panel {{
-        /* Anchor panel to the TOP of the iframe — phones show the top ~500-700px
-           of the 1080px iframe. bottom:0 would place the panel completely off-screen. */
-        top: 65px !important;
-        bottom: auto !important;
+        top: auto !important;
+        bottom: 0 !important;
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        height: 460px !important;
-        max-height: 460px !important;
+        height: 52vh !important;
+        max-height: 52vh !important;
         min-height: 0;
-        border-radius: 0 0 20px 20px !important;
+        border-radius: 20px 20px 0 0 !important;
         border-left: none !important;
         border-right: none !important;
-        border-top: none !important;
+        border-bottom: none !important;
         overflow-y: scroll !important;
         overflow-x: hidden !important;
         touch-action: pan-y !important;
         overscroll-behavior-y: contain !important;
         -webkit-overflow-scrolling: touch !important;
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px) !important;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px) !important;
       }}
-      /* No drag handle on top-anchored panel */
+      /* Drag handle pill */
       .right-panel::before {{
-        display: none;
+        content: '' !important;
+        display: block !important;
+        width: 36px;
+        height: 4px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.22);
+        margin: 8px auto 4px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        z-index: 1;
       }}
-      /* Make inner content fit full width */
+
+      /* Panel content */
       .panel-inner {{
-        padding: 12px 14px 24px !important;
+        padding: 10px 12px 20px !important;
       }}
       .panel-flight-hero {{
-        font-size: 28px !important;
+        font-size: 26px !important;
       }}
-      /* 2-col metrics grid on phone */
       .metrics-grid-4 {{
         grid-template-columns: 1fr 1fr !important;
       }}
-      /* Route display full width */
       .route-display {{
         gap: 6px !important;
       }}
       .route-apt-code {{
-        font-size: 26px !important;
+        font-size: 24px !important;
       }}
-      /* Delay section full width */
       .delay-row {{
         flex-direction: column !important;
         gap: 8px !important;
       }}
-      /* Make close button bigger and easier to tap */
       .panel-close {{
         width: 40px !important;
         height: 40px !important;
         font-size: 22px !important;
       }}
-      /* Sparkline full width */
       .sparkline-card {{
         margin: 0 !important;
       }}
-      /* Alert feed: full width */
+
+      /* Alert feed: full width, below tool bar */
       #alert-feed {{
-        right: 8px;
-        left: 8px;
-        top: 108px;
+        right: 6px;
+        left: 6px;
+        top: 100px;
         width: auto;
-        max-width: calc(100% - 16px);
+        max-width: calc(100% - 12px);
+        pointer-events: auto;
       }}
-      /* Filter and alerts panels: full width */
-      .filter-panel, .alerts-side-panel {{
-        left: 8px;
-        right: 8px;
-        width: auto;
-        max-width: calc(100% - 16px);
+
+      /* Filter panel: full width below tool bar */
+      .filter-panel {{
+        top: 133px !important;
+        left: 6px !important;
+        right: 6px !important;
+        width: auto !important;
+        max-width: calc(100% - 12px) !important;
+        touch-action: pan-y;
+        overscroll-behavior-y: contain;
+      }}
+
+      /* Alerts side panel: full-width drop-down from top */
+      .alerts-side-panel {{
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: auto !important;
+        width: 100% !important;
+        max-height: 55vh !important;
+        border-radius: 0 0 16px 16px !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-top: none !important;
         touch-action: pan-y;
         overscroll-behavior-y: contain;
       }}
@@ -3429,6 +3496,29 @@ def generate_mapbox_base_html(
     let _dpThreshold = 0;   // delay prediction slider state — survives rail re-renders
     let ROUTE_SOURCE_READY = false;
     let USER_LOCATION_MARKER = null;
+
+    // ── Mobile iframe height fix ───────────────────────────────────────────────
+    // On mobile, Streamlit creates a 1080px tall iframe but phones only show the
+    // top ~550-700px. bottom:0 and vh units would land off-screen.
+    // We use Streamlit's setFrameHeight protocol to shrink the iframe to the actual
+    // phone screen size, so all positioning works correctly.
+    (function _fixMobileFrameHeight() {{
+      const isMobile = window.screen.width <= 768;
+      if (!isMobile) return;
+      // Compute a safe iframe height: physical screen minus browser chrome and
+      // Streamlit top bar (approx 140px total overhead).
+      const h = Math.max(520, window.screen.height - 140);
+      try {{
+        window.parent.postMessage({{ type: 'streamlit:setFrameHeight', height: h }}, '*');
+      }} catch(e) {{}}
+      // Re-send on resize (orientation change etc.)
+      window.addEventListener('resize', function() {{
+        try {{
+          const h2 = Math.max(520, window.screen.height - 140);
+          window.parent.postMessage({{ type: 'streamlit:setFrameHeight', height: h2 }}, '*');
+        }} catch(e) {{}}
+      }});
+    }})();
 
     // ── Speed / altitude filter state ─────────────────────────────────────────
     let _altMin = 0, _altMax = 45000;
