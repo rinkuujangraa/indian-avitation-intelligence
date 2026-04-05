@@ -3161,40 +3161,39 @@ def generate_mapbox_base_html(
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        /* Use 65vh so there's always map visible above */
-        height: 65vh !important;
-        max-height: 65vh !important;
-        min-height: 0 !important;
-        /* MUST be scroll not auto — auto can collapse on iOS */
-        overflow-y: scroll !important;
-        overflow-x: hidden !important;
-        -webkit-overflow-scrolling: touch !important;
-        overscroll-behavior-y: contain !important;
-        touch-action: pan-y !important;
+        /* Fixed height so overflow-y:scroll works — avoid 72vh shrink issues */
+        height: 72svh !important;
+        max-height: 72svh !important;
+        min-height: 0;
         border-radius: 20px 20px 0 0 !important;
         border-left: none !important;
         border-right: none !important;
         border-bottom: none !important;
-        /* Extra bottom padding so last content clears home-bar */
-        padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
+        overflow-y: scroll !important;
+        overflow-x: hidden !important;
+        touch-action: pan-y !important;
+        overscroll-behavior-y: contain !important;
+        -webkit-overflow-scrolling: touch !important;
+        /* ::before drag handle takes 24px — compensate at bottom so last item clears */
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px) !important;
       }}
-      /* Drag handle — separate element ABOVE scroll area using padding trick */
+      /* Drag handle */
       .right-panel::before {{
         content: '';
         display: block;
         width: 40px;
         height: 4px;
         border-radius: 999px;
-        background: rgba(255,255,255,0.22);
-        margin: 10px auto 4px;
+        background: rgba(255,255,255,0.20);
+        margin: 10px auto 6px;
         flex-shrink: 0;
         position: sticky;
         top: 0;
-        z-index: 2;
+        z-index: 1;
       }}
       /* Make inner content fit full width */
       .panel-inner {{
-        padding: 12px 14px 16px !important;
+        padding: 12px 14px 24px !important;
       }}
       .panel-flight-hero {{
         font-size: 28px !important;
