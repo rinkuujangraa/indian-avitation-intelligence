@@ -1,0 +1,35 @@
+<svg width="1400" height="420" viewBox="0 0 1400 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="v1-accent" x1="32" y1="40" x2="260" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC14D"/>
+      <stop offset="1" stop-color="#FF9F1A"/>
+    </linearGradient>
+    <linearGradient id="v1-dark" x1="0" y1="0" x2="320" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#121A26"/>
+      <stop offset="1" stop-color="#0A1018"/>
+    </linearGradient>
+    <filter id="v1-shadow" x="0" y="0" width="360" height="360" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#02060D" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#v1-shadow)">
+    <rect x="24" y="30" width="300" height="300" rx="72" fill="url(#v1-dark)"/>
+    <path d="M112 246L176 88H228L292 246H239L224 207H180L166 246H112ZM194 163H210L202 140L194 163Z" fill="url(#v1-accent)"/>
+    <path d="M94 212C120 167 163 136 219 120C243 113 267 110 291 110" stroke="#5CD2FF" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 18"/>
+    <path d="M274 98L309 111L283 139" stroke="#5CD2FF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <g>
+    <text x="378" y="184" fill="#F4F7FB" font-size="88" font-family="Inter, Arial, sans-serif" font-weight="800" letter-spacing="-2">
+      Aviation Intelligence
+    </text>
+    <text x="382" y="248" fill="#8FA2B8" font-size="34" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="4">
+      LIVE AIRSPACE ANALYTICS
+    </text>
+    <rect x="382" y="286" width="212" height="44" rx="22" fill="#0F1723"/>
+    <text x="421" y="316" fill="#FFC14D" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="2">
+      INDIA OPS
+    </text>
+  </g>
+</svg>

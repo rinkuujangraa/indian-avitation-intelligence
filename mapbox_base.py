@@ -674,12 +674,7 @@ def generate_mapbox_base_html(
       border-radius: 14px;
       display: grid;
       place-items: center;
-      background: linear-gradient(180deg, #ffc84d, #ffb72b);
-      color: #091019;
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: -0.05em;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+      overflow: hidden;
     }}
     .brand-copy {{
       display: flex;
@@ -2397,7 +2392,6 @@ def generate_mapbox_base_html(
       .brand-mark {{
         width: 38px;
         height: 38px;
-        font-size: 24px;
       }}
       .brand-title {{
         font-size: 14px;
@@ -3136,7 +3130,7 @@ def generate_mapbox_base_html(
         gap: 0;
       }}
       .brand-copy {{ display: none; }}
-      .brand-mark {{ width: 36px; height: 36px; font-size: 22px; border-radius: 12px; flex-shrink: 0; }}
+      .brand-mark {{ width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0; overflow: hidden; }}
       /* Module + search strip */
       .top-center-stack {{
         top: 8px;
@@ -3338,7 +3332,7 @@ def generate_mapbox_base_html(
   </div>
   <div id="overlay-root">
     <div class="brand-panel glass-panel">
-      <div class="brand-mark">A</div>
+      <div class="brand-mark"><svg width="42" height="42" viewBox="24 30 300 300" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mbx-ic-a" x1="32" y1="40" x2="260" y2="300" gradientUnits="userSpaceOnUse"><stop stop-color="#FFC14D"/><stop offset="1" stop-color="#FF9F1A"/></linearGradient><linearGradient id="mbx-ic-d" x1="0" y1="0" x2="320" y2="320" gradientUnits="userSpaceOnUse"><stop stop-color="#121A26"/><stop offset="1" stop-color="#0A1018"/></linearGradient></defs><rect x="24" y="30" width="300" height="300" rx="72" fill="url(#mbx-ic-d)"/><path d="M112 246L176 88H228L292 246H239L224 207H180L166 246H112ZM194 163H210L202 140L194 163Z" fill="url(#mbx-ic-a)"/><path d="M94 212C120 167 163 136 219 120C243 113 267 110 291 110" stroke="#5CD2FF" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 18"/><path d="M274 98L309 111L283 139" stroke="#5CD2FF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="brand-copy">
         <div class="brand-title">Aviation Intelligence</div>
         <div class="brand-subtitle">India OCC Surface</div>

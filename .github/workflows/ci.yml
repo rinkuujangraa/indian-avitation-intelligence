@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  test:
+    name: Pytest — Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        env:
+          # Provide dummy keys so imports that call load_dotenv() don't fail
+          AIRLABS_API_KEY: dummy
+          MAPBOX_TOKEN: pk.dummy
+          CHECKWX_API_KEY: dummy
+          CESIUM_TOKEN: dummy
+        run: python -m pytest tests/ -v --tb=short

@@ -1,0 +1,31 @@
+<svg width="1400" height="420" viewBox="0 0 1400 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="v3-accent" x1="71" y1="62" x2="275" y2="283" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5CD2FF"/>
+      <stop offset="1" stop-color="#248DFF"/>
+    </linearGradient>
+    <linearGradient id="v3-panel" x1="33" y1="35" x2="319" y2="318" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111A27"/>
+      <stop offset="1" stop-color="#0A1018"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="28" y="34" width="300" height="300" rx="76" fill="url(#v3-panel)"/>
+  <path d="M93 245L178 104L262 245" stroke="url(#v3-accent)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M130 212H226" stroke="#F3F7FB" stroke-width="14" stroke-linecap="round"/>
+  <path d="M100 129C130 102 169 88 212 88C227 88 242 90 257 94" stroke="#FFB84D" stroke-width="9" stroke-linecap="round" stroke-dasharray="2 17"/>
+  <path d="M245 79L279 93L253 118" stroke="#FFB84D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g>
+    <text x="378" y="184" fill="#F4F7FB" font-size="86" font-family="Inter, Arial, sans-serif" font-weight="800" letter-spacing="-2">
+      Aviation Intelligence
+    </text>
+    <text x="382" y="248" fill="#8EA2B7" font-size="34" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="4">
+      AIRSPACE TRACKING PLATFORM
+    </text>
+    <rect x="382" y="286" width="188" height="44" rx="22" fill="#0F1723"/>
+    <text x="422" y="316" fill="#5CD2FF" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="2">
+      LIVE OPS
+    </text>
+  </g>
+</svg>

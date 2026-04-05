@@ -62,10 +62,15 @@ st.set_page_config(
 st.markdown(
     """
 <script>document.title = "Aviation Intelligence \u00b7 India Live Flight Tracker";</script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='24 30 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='fa' x1='32' y1='40' x2='260' y2='300' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%23FFC14D'/%3E%3Cstop offset='1' stop-color='%23FF9F1A'/%3E%3C/linearGradient%3E%3ClinearGradient id='fd' x1='0' y1='0' x2='320' y2='320' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%23121A26'/%3E%3Cstop offset='1' stop-color='%230A1018'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='24' y='30' width='300' height='300' rx='72' fill='url(%23fd)'/%3E%3Cpath d='M112 246L176 88H228L292 246H239L224 207H180L166 246H112ZM194 163H210L202 140L194 163Z' fill='url(%23fa)'/%3E%3Cpath d='M94 212C120 167 163 136 219 120C243 113 267 110 291 110' stroke='%235CD2FF' stroke-width='10' stroke-linecap='round' stroke-dasharray='2 18'/%3E%3Cpath d='M274 98L309 111L283 139' stroke='%235CD2FF' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
 <meta property="og:title" content="Aviation Intelligence \u00b7 India Live Flight Tracker" />
 <meta property="og:description" content="Live India flight tracking, ML delay prediction and airport analytics. Built with Python, Streamlit, and Mapbox." />
 <meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary" />
+<meta property="og:image" content="https://web-production-39c38.up.railway.app/app/static/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://web-production-39c38.up.railway.app/app/static/og.png" />
 <meta name="twitter:title" content="Aviation Intelligence \u00b7 India Live Flight Tracker" />
 <meta name="twitter:description" content="Live India flight tracking, ML delay prediction and airport analytics." />
 <meta name="description" content="Live India flight tracking, ML delay prediction and airport analytics. Built with Python, Streamlit, and Mapbox." />
@@ -477,10 +482,7 @@ def _build_dashboard_html(ctx: DashboardContext) -> str:
       border-radius: 11px;
       display: grid;
       place-items: center;
-      background: linear-gradient(145deg, var(--yellow), #ff9d35);
-      color: #091018;
-      font-weight: 900;
-      font-size: 20px;
+      overflow: hidden;
       flex: 0 0 auto;
     }}
     .brand-text {{
@@ -1199,7 +1201,7 @@ def _build_dashboard_html(ctx: DashboardContext) -> str:
   <div class="overlay">
     <div class="topbar">
       <div class="brand">
-        <div class="brand-mark">A</div>
+        <div class="brand-mark"><svg width="32" height="32" viewBox="24 30 300 300" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="app-ic-a" x1="32" y1="40" x2="260" y2="300" gradientUnits="userSpaceOnUse"><stop stop-color="#FFC14D"/><stop offset="1" stop-color="#FF9F1A"/></linearGradient><linearGradient id="app-ic-d" x1="0" y1="0" x2="320" y2="320" gradientUnits="userSpaceOnUse"><stop stop-color="#121A26"/><stop offset="1" stop-color="#0A1018"/></linearGradient></defs><rect x="24" y="30" width="300" height="300" rx="72" fill="url(#app-ic-d)"/><path d="M112 246L176 88H228L292 246H239L224 207H180L166 246H112ZM194 163H210L202 140L194 163Z" fill="url(#app-ic-a)"/><path d="M94 212C120 167 163 136 219 120C243 113 267 110 291 110" stroke="#5CD2FF" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 18"/><path d="M274 98L309 111L283 139" stroke="#5CD2FF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="brand-text">Aviation Intelligence<br>Platform</div>
       </div>
       <div class="nav panel">

@@ -1,0 +1,34 @@
+<svg width="1400" height="420" viewBox="0 0 1400 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="v2-accent" x1="79" y1="59" x2="250" y2="269" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A7FF4D"/>
+      <stop offset="1" stop-color="#59D34B"/>
+    </linearGradient>
+    <linearGradient id="v2-panel" x1="44" y1="38" x2="312" y2="318" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101927"/>
+      <stop offset="1" stop-color="#0A1018"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="28" y="34" width="300" height="300" rx="76" fill="url(#v2-panel)"/>
+  <circle cx="178" cy="184" r="74" stroke="#223449" stroke-width="10"/>
+  <circle cx="178" cy="184" r="46" stroke="#2D4258" stroke-width="8"/>
+  <circle cx="178" cy="184" r="18" fill="url(#v2-accent)"/>
+  <path d="M115 118C154 86 214 83 261 116" stroke="#5CD2FF" stroke-width="9" stroke-linecap="round"/>
+  <path d="M93 93L178 184" stroke="#5CD2FF" stroke-width="10" stroke-linecap="round"/>
+  <path d="M170 176L234 106" stroke="url(#v2-accent)" stroke-width="12" stroke-linecap="round"/>
+  <path d="M221 106L253 95L243 126" fill="url(#v2-accent)"/>
+
+  <g>
+    <text x="378" y="184" fill="#F3F7FB" font-size="86" font-family="Inter, Arial, sans-serif" font-weight="800" letter-spacing="-2">
+      Aviation Intelligence
+    </text>
+    <text x="382" y="248" fill="#90A3B8" font-size="34" font-family="Inter, Arial, sans-serif" font-weight="600" letter-spacing="4">
+      TRAFFIC · DELAY · ROUTE INTEL
+    </text>
+    <rect x="382" y="286" width="236" height="44" rx="22" fill="#0F1723"/>
+    <text x="415" y="316" fill="#A7FF4D" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700" letter-spacing="2">
+      ARRIVAL FLOW RISK
+    </text>
+  </g>
+</svg>
