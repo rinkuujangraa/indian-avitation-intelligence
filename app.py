@@ -156,16 +156,27 @@ st.markdown(
   // Hide splash once Streamlit has mounted the app
   (function() {
     var splash = document.getElementById("avi-splash");
-    function tryHide() {
-      var root = document.querySelector('[data-testid="stApp"]') || document.querySelector(".stApp");
-      if (root && root.children.length > 1) {
-        splash.classList.add("hidden");
-        setTimeout(function() { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 600);
-      } else {
-        requestAnimationFrame(tryHide);
-      }
+    function hideSplash() {
+      splash.classList.add("hidden");
+      setTimeout(function() { if (splash && splash.parentNode) splash.parentNode.removeChild(splash); }, 600);
     }
-    setTimeout(tryHide, 800);
+    // Check for any Streamlit content mounting
+    function tryHide() {
+      var indicators = [
+        document.querySelector('[data-testid="stApp"]'),
+        document.querySelector('[data-testid="stVerticalBlock"]'),
+        document.querySelector('[data-testid="stHtml"]'),
+        document.querySelector('.stApp iframe'),
+        document.querySelector('iframe[title]')
+      ];
+      for (var i = 0; i < indicators.length; i++) {
+        if (indicators[i]) { hideSplash(); return; }
+      }
+      requestAnimationFrame(tryHide);
+    }
+    // Hard fallback: always hide after 5 seconds no matter what
+    setTimeout(hideSplash, 5000);
+    setTimeout(tryHide, 600);
   })();
 </script>
 """,
