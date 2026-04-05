@@ -3165,9 +3165,12 @@ def generate_mapbox_base_html(
       .tool-btn {{
         white-space: nowrap;
         flex-shrink: 0;
-        font-size: 10px;
-        padding: 5px 9px;
-        border-radius: 8px;
+        font-size: 11px;
+        padding: 7px 11px;
+        border-radius: 9px;
+        min-height: 34px;
+        display: inline-flex;
+        align-items: center;
       }}
 
       /* Left rail: horizontal scroll strip — anchored below tool bar */
@@ -3195,9 +3198,9 @@ def generate_mapbox_base_html(
       }}
       .left-rail .rail-card {{
         flex-shrink: 0;
-        width: 200px;
-        min-width: 170px;
-        padding: 8px 10px;
+        width: 210px;
+        min-width: 175px;
+        padding: 9px 11px;
       }}
 
       /* Right panel: bottom sheet — works correctly once iframe is right height */
@@ -3241,29 +3244,82 @@ def generate_mapbox_base_html(
       .panel-inner {{
         padding: 10px 12px 20px !important;
       }}
+      /* Sticky header — close button always reachable while scrolling */
+      .panel-head-row {{
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 10 !important;
+        background: rgba(8,13,21,0.97) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        margin: 0 -12px 8px !important;
+        padding: 10px 12px 8px !important;
+        border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+      }}
+      .panel-close {{
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 22px !important;
+        border-radius: 12px !important;
+      }}
+      .follow-btn {{
+        padding: 8px 14px !important;
+        font-size: 11px !important;
+        border-radius: 10px !important;
+        min-height: 36px !important;
+      }}
       .panel-flight-hero {{
-        font-size: 26px !important;
+        font-size: 30px !important;
+      }}
+      .panel-chip-row {{
+        gap: 5px !important;
+        row-gap: 5px !important;
+      }}
+      .pchip {{
+        font-size: 11px !important;
+        padding: 5px 10px !important;
+      }}
+      .mcard {{
+        padding: 10px 12px !important;
+      }}
+      .mcard-label {{
+        font-size: 9px !important;
+        margin-bottom: 6px !important;
+      }}
+      .mcard-value {{
+        font-size: 16px !important;
       }}
       .metrics-grid-4 {{
         grid-template-columns: 1fr 1fr !important;
+        gap: 7px !important;
       }}
       .route-display {{
-        gap: 6px !important;
+        gap: 8px !important;
       }}
       .route-apt-code {{
-        font-size: 24px !important;
+        font-size: 28px !important;
+      }}
+      .route-apt-city {{
+        font-size: 12px !important;
+      }}
+      .delay-card {{
+        padding: 12px 14px !important;
       }}
       .delay-row {{
         flex-direction: column !important;
         gap: 8px !important;
       }}
-      .panel-close {{
-        width: 40px !important;
-        height: 40px !important;
-        font-size: 22px !important;
+      .afri-card {{
+        padding: 12px 14px !important;
       }}
       .sparkline-card {{
         margin: 0 !important;
+      }}
+      .pos-card {{
+        padding: 10px 12px !important;
+      }}
+      .panel-section-divider {{
+        margin: 12px 0 !important;
       }}
 
       /* Alert feed: full width, below tool bar */
@@ -4845,8 +4901,21 @@ def generate_mapbox_base_html(
       // Tapping the shield closes the panel (backdrop-dismiss UX).
       if (window.innerWidth <= 600) {{
         panel.scrollTop = 0;
+        // Compute how much of the iframe is actually visible on the phone screen.
+        // window.innerHeight = iframe height (may still be 1080 before postMessage resize).
+        // window.screen.height - 140 = actual phone screen minus browser chrome.
+        // Math.min picks the smallest = the truly visible area.
+        const _visH = Math.min(window.innerHeight, window.screen.height - 140);
+        const _panH = Math.round(_visH * 0.60);
+        const _panTop = _visH - _panH;
+        panel.style.top = _panTop + 'px';
+        panel.style.bottom = 'auto';
+        panel.style.height = _panH + 'px';
+        panel.style.maxHeight = _panH + 'px';
         const shield = document.getElementById('map-shield');
         if (shield) {{
+          shield.style.top = '0';
+          shield.style.height = _panTop + 'px';
           shield.style.display = 'block';
           shield.onclick = function() {{ hideRightPanel(); }};
         }}
@@ -5122,10 +5191,18 @@ def generate_mapbox_base_html(
       if (!panel) return;
       panel.classList.remove('rp-visible');
       panel.style.display = 'none';
+      panel.style.top = '';
+      panel.style.bottom = '';
+      panel.style.height = '';
+      panel.style.maxHeight = '';
       panel.innerHTML = '';
       _cameraFollow = false;
       const shield = document.getElementById('map-shield');
-      if (shield) shield.style.display = 'none';
+      if (shield) {{
+        shield.style.display = 'none';
+        shield.style.top = '';
+        shield.style.height = '';
+      }}
     }}
 
     // ── SDF icon registration ──────────────────────────────────────────────────
