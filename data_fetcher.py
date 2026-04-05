@@ -585,6 +585,7 @@ def _fetch_opensky_fallback(region: str = "india") -> pd.DataFrame:
         return pd.DataFrame(columns=KEEP_COLUMNS)
 
 
+def get_airport_schedules(
     airport_iata: str,
     direction: str = "arrival",
     max_retries: int = 2,
