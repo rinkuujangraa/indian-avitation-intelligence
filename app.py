@@ -987,10 +987,108 @@ def _build_dashboard_html(ctx: DashboardContext) -> str:
       .detail-bar {{
         left: 8px;
         right: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        transform: none;
+        width: auto;
+      }}
+      .detail-grid {{
+        min-width: 640px;
       }}
       .export-btn {{
         bottom: 8px;
         left: 8px;
+      }}
+    }}
+    @media (max-width: 480px) {{
+      :root {{
+        --stage-height: 600px;
+      }}
+      .topbar {{
+        grid-template-columns: 42px 1fr 0 0 0 42px;
+        gap: 5px;
+        top: 6px;
+        left: 6px;
+        right: 6px;
+      }}
+      .brand {{
+        height: 50px;
+        width: 42px;
+        justify-content: center;
+      }}
+      .menu-pill {{
+        height: 50px;
+        width: 42px;
+        border-radius: 16px;
+        font-size: 10px;
+      }}
+      .time-pill, .map-pill {{
+        display: none;
+      }}
+      .nav {{
+        height: 50px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 4px;
+        gap: 3px;
+        flex-wrap: nowrap;
+      }}
+      .nav::-webkit-scrollbar {{
+        display: none;
+      }}
+      .nav button {{
+        min-width: 66px;
+        padding: 5px 8px;
+        font-size: 10px;
+        flex-shrink: 0;
+        border-radius: 12px;
+      }}
+      .nav button strong {{
+        font-size: 10px;
+      }}
+      .kpi-strip {{
+        top: 66px;
+        grid-template-columns: repeat(2, 1fr);
+        left: 6px;
+        right: 6px;
+        gap: 5px;
+      }}
+      .kpi-card .v {{
+        font-size: 15px;
+      }}
+      .scope-card {{
+        top: 154px;
+        left: 6px;
+        right: 6px;
+        width: auto;
+      }}
+      .detail-bar {{
+        left: 6px;
+        right: 6px;
+        bottom: 6px;
+        transform: none;
+        width: auto;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }}
+      .detail-grid {{
+        min-width: 580px;
+        gap: 8px;
+      }}
+      .detail-main h2 {{
+        font-size: 22px;
+      }}
+      .route-box .code {{
+        font-size: 22px;
+      }}
+      .export-btn {{
+        bottom: 6px;
+        left: 6px;
+        height: 32px;
+        font-size: 11px;
+        padding: 0 11px;
       }}
     }}
   </style>
@@ -1419,6 +1517,25 @@ def _build_dashboard_html(ctx: DashboardContext) -> str:
   }}
 
   setModule(activeModule);
+
+  // Responsive stage height — use actual viewport width to pick the right height
+  (function() {{
+    function applyResponsiveHeight() {{
+      var w = window.innerWidth;
+      var root = document.documentElement;
+      if (w <= 480) {{
+        root.style.setProperty('--stage-height', '600px');
+      }} else if (w <= 768) {{
+        root.style.setProperty('--stage-height', '680px');
+      }} else if (w <= 1024) {{
+        root.style.setProperty('--stage-height', '760px');
+      }} else {{
+        root.style.removeProperty('--stage-height');
+      }}
+    }}
+    applyResponsiveHeight();
+    window.addEventListener('resize', applyResponsiveHeight);
+  }})();
 </script>
 </html>
 """
