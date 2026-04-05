@@ -1229,6 +1229,10 @@ def generate_mapbox_base_html(
       from {{ opacity: 0; transform: translateX(18px) scale(0.97); }}
       to   {{ opacity: 1; transform: translateX(0) scale(1); }}
     }}
+    @keyframes rpSlideDown {{
+      from {{ opacity: 0; transform: translateY(-24px) scale(0.98); }}
+      to   {{ opacity: 1; transform: translateY(0) scale(1); }}
+    }}
     @keyframes rpSlideUp {{
       from {{ opacity: 0; transform: translateY(100%); }}
       to   {{ opacity: 1; transform: translateY(0); }}
@@ -1244,7 +1248,7 @@ def generate_mapbox_base_html(
     }}
     @media (max-width: 600px) {{
       .right-panel.rp-visible {{
-        animation: rpSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation: rpSlideDown 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
       }}
     }}
     .right-panel {{
@@ -3155,41 +3159,31 @@ def generate_mapbox_base_html(
       }}
       /* Right panel: full-width bottom sheet */
       .right-panel {{
-        top: auto !important;
-        bottom: 0 !important;
+        /* Anchor panel to the TOP of the iframe — phones show the top ~500-700px
+           of the 1080px iframe. bottom:0 would place the panel completely off-screen. */
+        top: 65px !important;
+        bottom: auto !important;
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        /* Height set dynamically by JS. Fallback used if JS fails. */
-        height: 640px !important;
-        max-height: 640px !important;
+        height: 460px !important;
+        max-height: 460px !important;
         min-height: 0;
-        border-radius: 20px 20px 0 0 !important;
+        border-radius: 0 0 20px 20px !important;
         border-left: none !important;
         border-right: none !important;
-        border-bottom: none !important;
+        border-top: none !important;
         overflow-y: scroll !important;
         overflow-x: hidden !important;
         touch-action: pan-y !important;
         overscroll-behavior-y: contain !important;
         -webkit-overflow-scrolling: touch !important;
-        /* ::before drag handle takes 24px — compensate at bottom so last item clears */
         padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px) !important;
       }}
-      /* Drag handle */
+      /* No drag handle on top-anchored panel */
       .right-panel::before {{
-        content: '';
-        display: block;
-        width: 40px;
-        height: 4px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.20);
-        margin: 10px auto 6px;
-        flex-shrink: 0;
-        position: sticky;
-        top: 0;
-        z-index: 1;
+        display: none;
       }}
       /* Make inner content fit full width */
       .panel-inner {{
@@ -4761,15 +4755,6 @@ def generate_mapbox_base_html(
       // Tapping the shield closes the panel (backdrop-dismiss UX).
       if (window.innerWidth <= 600) {{
         panel.scrollTop = 0;
-        // Use the real device screen height (window.top = Streamlit parent page),
-        // NOT window.innerHeight which equals the 1080px iframe height.
-        let _ph = 640;
-        try {{ _ph = Math.round(window.top.innerHeight * 0.80); }} catch(e) {{
-          // window.top cross-origin blocked — use screen.height (CSS px, always readable)
-          try {{ _ph = Math.round(window.screen.height * 0.78); }} catch(e2) {{}}
-        }}
-        panel.style.height = _ph + 'px';
-        panel.style.maxHeight = _ph + 'px';
         const shield = document.getElementById('map-shield');
         if (shield) {{
           shield.style.display = 'block';
@@ -5047,8 +5032,6 @@ def generate_mapbox_base_html(
       if (!panel) return;
       panel.classList.remove('rp-visible');
       panel.style.display = 'none';
-      panel.style.height = '';
-      panel.style.maxHeight = '';
       panel.innerHTML = '';
       _cameraFollow = false;
       const shield = document.getElementById('map-shield');
