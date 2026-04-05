@@ -3143,13 +3143,17 @@ def generate_mapbox_base_html(
         right: 0;
         width: 100%;
         max-width: 100%;
-        max-height: 70vh;
+        max-height: 72vh;
         border-radius: 16px 16px 0 0;
         border-left: none;
         border-right: none;
         border-bottom: none;
         touch-action: pan-y;
         overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+      }}
+      .panel-inner {{
+        padding-bottom: 32px;
       }}
       /* Alert feed: full width */
       #alert-feed {{
@@ -6975,30 +6979,69 @@ def generate_mapbox_base_html(
        No dynamic resize needed; it causes iframe height conflicts. */
 
     // ── Mobile touch fix: stop Mapbox stealing scroll gestures from panels ──
+    // Strategy: on touchstart inside any scrollable panel, stopPropagation
+    // (non-passive) so Mapbox's document-level touchstart never fires.
+    // On touchmove we also call stopPropagation AND — only if the element
+    // is actually scrollable in that direction — preventDefault so the browser
+    // doesn't bounce to the map underneath.
     (function() {{
       var SCROLL_SELECTORS = [
         '.left-rail', '.right-panel', '.filter-panel',
         '.alerts-side-panel', '#asp-body', '#sched-content',
         '.search-dropdown', '#flight-board-overlay .fids-table-wrap',
-        '.module-strip'
+        '.module-strip', '.panel-inner'
       ];
+
+      function canScrollY(el) {{
+        return el.scrollHeight > el.clientHeight + 2;
+      }}
+      function canScrollX(el) {{
+        return el.scrollWidth > el.clientWidth + 2;
+      }}
+
       function blockMapTouch(el) {{
+        // Non-passive touchstart — stop Mapbox from registering this touch at all
         el.addEventListener('touchstart', function(e) {{
           e.stopPropagation();
-        }}, {{ passive: true }});
+        }}, {{ passive: false, capture: false }});
+
         el.addEventListener('touchmove', function(e) {{
           e.stopPropagation();
+          // Prevent map pan only when the panel has scroll room left
+          var t = e.changedTouches[0];
+          if (!el._touchStartY) return;
+          var dy = t.clientY - el._touchStartY;
+          var dx = t.clientX - (el._touchStartX || 0);
+          var isVertical = Math.abs(dy) >= Math.abs(dx);
+          if (isVertical) {{
+            var atTop    = el.scrollTop <= 0 && dy > 0;
+            var atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2 && dy < 0;
+            if (!atTop && !atBottom && canScrollY(el)) e.preventDefault();
+          }} else {{
+            var atLeft  = el.scrollLeft <= 0 && dx > 0;
+            var atRight = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 && dx < 0;
+            if (!atLeft && !atRight && canScrollX(el)) e.preventDefault();
+          }}
+        }}, {{ passive: false, capture: false }});
+
+        el.addEventListener('touchstart', function(e) {{
+          var t = e.touches[0];
+          el._touchStartY = t.clientY;
+          el._touchStartX = t.clientX;
         }}, {{ passive: true }});
+
         el.addEventListener('touchend', function(e) {{
           e.stopPropagation();
+          el._touchStartY = null;
+          el._touchStartX = null;
         }}, {{ passive: true }});
       }}
+
       function attachAll() {{
         SCROLL_SELECTORS.forEach(function(sel) {{
           document.querySelectorAll(sel).forEach(blockMapTouch);
         }});
       }}
-      // Run immediately + watch for dynamically added elements
       document.addEventListener('DOMContentLoaded', attachAll);
       if (document.readyState !== 'loading') attachAll();
       var mo = new MutationObserver(function(mutations) {{
