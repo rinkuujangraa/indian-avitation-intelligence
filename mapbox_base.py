@@ -6128,6 +6128,7 @@ def generate_mapbox_base_html(
 
       mapboxgl.accessToken = MAPBOX_TOKEN;
       const PRIMARY_STYLE = 'mapbox://styles/mapbox/dark-v11';
+      const _isMobile = window.innerWidth <= 768;
       const map = new mapboxgl.Map({{
         container: 'map',
         style: PRIMARY_STYLE,
@@ -6140,14 +6141,18 @@ def generate_mapbox_base_html(
         projection: 'globe',
         renderWorldCopies: true,
       }});
+      // On mobile, globe projection strains WebGL — downgrade to mercator so the map actually loads
+      if (_isMobile) {{
+        try {{ map.setProjection('mercator'); }} catch(e) {{}}
+      }}
       _mapRef = map;
 
       map.addControl(new mapboxgl.NavigationControl({{ visualizePitch: true, showCompass: true }}), 'bottom-left');
       map.addControl(new mapboxgl.ScaleControl({{ unit: 'metric' }}), 'bottom-right');
       map.addControl(new mapboxgl.FullscreenControl(), 'bottom-left');
 
-      // Safety net: if nothing fires within 5s force-hide the splash.
-      window.setTimeout(hideSplash, 5000);
+      // Safety net: if nothing fires within 3s force-hide the splash.
+      window.setTimeout(hideSplash, 3000);
 
       let ready = false;
       const readyTimer = window.setTimeout(() => {{
