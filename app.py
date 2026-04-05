@@ -885,6 +885,79 @@ def _build_dashboard_html(ctx: DashboardContext) -> str:
       backdrop-filter: blur(12px);
       pointer-events: none;
     }}
+    .mob-menu-btn {{
+      display: none;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 3px;
+    }}
+    .mob-menu-btn .dots {{
+      font-size: 22px;
+      line-height: 1;
+      letter-spacing: 0.06em;
+    }}
+    .mob-menu-btn .mlabel {{
+      font-size: 8px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }}
+    .mob-menu {{
+      display: none;
+      position: absolute;
+      top: 64px;
+      left: 6px;
+      right: 6px;
+      background: linear-gradient(180deg, rgba(10,16,26,0.98), rgba(7,12,20,0.98));
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      box-shadow: 0 18px 44px rgba(0,0,0,0.5);
+      z-index: 200;
+      pointer-events: auto;
+      padding: 8px;
+      flex-direction: column;
+      gap: 3px;
+    }}
+    .mob-menu.open {{
+      display: flex;
+    }}
+    .mob-menu .mob-tab {{
+      width: 100%;
+      padding: 13px 16px;
+      border: 0;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }}
+    .mob-menu .mob-tab small {{
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--dim);
+    }}
+    .mob-menu .mob-tab.active {{
+      background: rgba(255,255,255,0.95);
+      color: #0d1621;
+    }}
+    .mob-menu .mob-tab.active small {{
+      color: rgba(13,22,33,0.54);
+    }}
     @media (max-width: 1440px) {{
       :root {{
         --stage-height: 860px;
@@ -1027,26 +1100,15 @@ def _build_dashboard_html(ctx: DashboardContext) -> str:
       }}
       .nav {{
         height: 50px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
         padding: 4px;
-        gap: 3px;
+        overflow: visible;
         flex-wrap: nowrap;
       }}
-      .nav::-webkit-scrollbar {{
+      .nav .module-tab {{
         display: none;
       }}
-      .nav button {{
-        min-width: 66px;
-        padding: 5px 8px;
-        font-size: 10px;
-        flex-shrink: 0;
-        border-radius: 12px;
-      }}
-      .nav button strong {{
-        font-size: 10px;
+      .mob-menu-btn {{
+        display: flex;
       }}
       .kpi-strip {{
         top: 66px;
@@ -1103,12 +1165,24 @@ def _build_dashboard_html(ctx: DashboardContext) -> str:
         <div class="brand-text">Aviation Intelligence<br>Platform</div>
       </div>
       <div class="nav panel">
+        <button type="button" class="mob-menu-btn" id="mob-menu-btn" onclick="toggleMobMenu()">
+          <span class="dots">&#8942;</span>
+          <span class="mlabel" id="mob-active-label">Menu</span>
+        </button>
         <button type="button" class="active module-tab" data-module="live_ops"><strong>Live Ops</strong><small>Tracking</small></button>
         <button type="button" class="module-tab" data-module="delay_prediction"><strong>Delay Prediction</strong><small>Risk engine</small></button>
         <button type="button" class="module-tab" data-module="airport_traffic"><strong>Airport Traffic</strong><small>Hub pressure</small></button>
         <button type="button" class="module-tab" data-module="route_intelligence"><strong>Route Intelligence</strong><small>Corridor load</small></button>
         <button type="button" class="module-tab" data-module="passenger_view"><strong>Passenger View</strong><small>Inbound status</small></button>
         <button type="button" class="module-tab" data-module="alerts"><strong>Alerts</strong><small>{anomaly_count} active</small></button>
+      </div>
+      <div class="mob-menu" id="mob-menu">
+        <button type="button" class="mob-tab module-tab active" data-module="live_ops">Live Ops <small>Tracking</small></button>
+        <button type="button" class="mob-tab module-tab" data-module="delay_prediction">Delay Prediction <small>Risk engine</small></button>
+        <button type="button" class="mob-tab module-tab" data-module="airport_traffic">Airport Traffic <small>Hub pressure</small></button>
+        <button type="button" class="mob-tab module-tab" data-module="route_intelligence">Route Intelligence <small>Corridor load</small></button>
+        <button type="button" class="mob-tab module-tab" data-module="passenger_view">Passenger View <small>Inbound status</small></button>
+        <button type="button" class="mob-tab module-tab" data-module="alerts">Alerts <small>{anomaly_count} active</small></button>
       </div>
       <div class="time-pill">{time.strftime("%H:%M", time.gmtime())}<br>UTC</div>
       <form class="search" method="get" action="javascript:void(0)" onsubmit="return submitDashboardSearch(event)">
@@ -1432,12 +1506,29 @@ def _build_dashboard_html(ctx: DashboardContext) -> str:
     }}
   }};
 
+  function toggleMobMenu() {{
+    var m = document.getElementById('mob-menu');
+    if (m) m.classList.toggle('open');
+  }}
+  document.addEventListener('click', function(e) {{
+    var btn = document.getElementById('mob-menu-btn');
+    var menu = document.getElementById('mob-menu');
+    if (menu && menu.classList.contains('open') && btn &&
+        !menu.contains(e.target) && !btn.contains(e.target)) {{
+      menu.classList.remove('open');
+    }}
+  }});
+
   function setModule(moduleKey, shouldReload = false) {{
     const content = moduleContent[moduleKey];
     if (!content) return;
     document.querySelectorAll('.module-tab').forEach((button) => {{
       button.classList.toggle('active', button.dataset.module === moduleKey);
     }});
+    var ml = document.getElementById('mob-active-label');
+    if (ml) ml.textContent = content.scopeK;
+    var menu = document.getElementById('mob-menu');
+    if (menu) menu.classList.remove('open');
     const primary = document.getElementById('right-stack-primary');
     const secondary = document.getElementById('right-stack-secondary');
     if (primary && secondary) {{
