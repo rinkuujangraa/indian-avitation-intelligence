@@ -20,6 +20,10 @@ import time
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
+try:
+    _html = st.html  # Streamlit ≥1.35 — preferred, no deprecation warning
+except AttributeError:
+    _html = components.html  # fallback for older versions
 
 from analytics import (
     compute_arrival_estimate,
@@ -132,7 +136,7 @@ def fetch_flights(region: str) -> pd.DataFrame:
     return get_flight_data(region=region).copy()
 
 
-@st.cache_data(ttl=10, show_spinner=False)
+@st.cache_data(ttl=30, show_spinner=False)
 def _fetch_live_positions(region: str, _tick: int) -> pd.DataFrame:
     """Short-TTL live position fetch used by the autonomous fragment."""
     return get_flight_data(region=region).copy()
@@ -1669,7 +1673,7 @@ _missing_keys = []
 if not os.getenv("AIRLABS_API_KEY"):
     _missing_keys.append("AIRLABS_API_KEY")
 if _missing_keys:
-    components.html(
+    _html(
         f"""
         <div style="font-family:'SF Pro Display','Segoe UI',Arial,sans-serif;
                     background:linear-gradient(135deg,#0d1520,#131c2a);
@@ -2163,10 +2167,10 @@ if use_mapbox:
     components.html(mapbox_html, height=DASHBOARD_HEIGHT, scrolling=False)
 
     # ── Live position update fragment ─────────────────────────────────────────
-    # Runs autonomously every 10 s without touching the map iframe.
+    # Runs autonomously every 30 s without touching the map iframe.
     # Fetches fresh flight positions and pushes them via the JS bridge.
     _autorefresh_paused = st.session_state.get("_autorefresh_paused", False)
-    _fragment_run_every = None if _autorefresh_paused else 10
+    _fragment_run_every = None if _autorefresh_paused else 30
 
     @st.fragment(run_every=_fragment_run_every)
     def _live_push() -> None:
