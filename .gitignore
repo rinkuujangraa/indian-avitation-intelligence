@@ -1,0 +1,22 @@
+.env
+.venv/
+__pycache__/
+.mypy_cache/
+.DS_Store
+flight_trails.json
+flights.html
+
+# Database & trained model artifacts (large / potentially sensitive)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+aviation_intelligence.db
+models/*.pkl
+models/*.joblib
+
+# Dev-only artifacts
+_archive/
+_diag2.py
+design_mockup*.html
+static/map.html

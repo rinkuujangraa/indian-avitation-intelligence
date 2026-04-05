@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rinku — Python Developer &amp; Aviation Intelligence Platform</title>
+  <meta name="description" content="Python Developer building real-world platforms. Aviation Intelligence — live India flight tracking, ML delay prediction, airport analytics." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Only load the weights we actually use; font-display:swap prevents render block -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #030810;
+    --bg2:      #070e18;
+    --bg3:      #0a1420;
+    --panel:    rgba(8,16,28,0.75);
+    --border:   rgba(255,255,255,0.07);
+    --border2:  rgba(255,255,255,0.13);
+    --border3:  rgba(255,255,255,0.20);
+    --text:     #eef3fa;
+    --muted:    rgba(238,243,250,0.58);
+    --dim:      rgba(238,243,250,0.36);
+    --yellow:   #ffcf34;
+    --lime:     #bcff5c;
+    --blue:     #5ba3ff;
+    --teal:     #2dd4bf;
+    --red:      #ff6557;
+    --grad1:    linear-gradient(135deg,#ffcf34,#bcff5c);
+    --grad2:    linear-gradient(135deg,#5ba3ff,#2dd4bf);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Inter","SF Pro Display","Segoe UI",sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  #bg-canvas {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; opacity: 0.55;
+  }
+  .grid-overlay {
+    position: fixed; inset: 0;
+    background:
+      repeating-linear-gradient(90deg, rgba(91,163,255,0.022) 0 1px, transparent 1px 100px),
+      repeating-linear-gradient(0deg,  rgba(91,163,255,0.022) 0 1px, transparent 1px 100px);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    height: 64px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px;
+    background: rgba(3,8,16,0.80); backdrop-filter: blur(24px) saturate(1.5);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-left { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+  .nav-monogram {
+    width: 38px; height: 38px; border-radius: 12px; background: var(--grad1);
+    display: grid; place-items: center; font-size: 17px; font-weight: 900; color: #060e18;
+    box-shadow: 0 0 0 1px rgba(255,207,52,0.30), 0 4px 16px rgba(255,207,52,0.22); flex-shrink: 0;
+  }
+  .nav-name { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+  .nav-divider { width: 1px; height: 18px; background: var(--border2); }
+  .nav-subtitle { font-size: 12px; font-weight: 500; color: var(--dim); }
+  .nav-right { display: flex; align-items: center; gap: 6px; }
+  .nav-pill {
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    padding: 7px 14px; border-radius: 10px; text-decoration: none;
+    transition: color 150ms, background 150ms;
+  }
+  .nav-pill:hover { color: var(--text); background: rgba(255,255,255,0.07); }
+  .nav-launch {
+    font-size: 13px; font-weight: 700; padding: 9px 20px; border-radius: 12px;
+    background: var(--grad1); color: #060e18; text-decoration: none;
+    box-shadow: 0 4px 18px rgba(255,207,52,0.30);
+    transition: opacity 150ms, transform 150ms, box-shadow 150ms;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .nav-launch:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(255,207,52,0.38); }
+
+  /* HERO */
+  .hero {
+    position: relative; z-index: 1; min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center; max-width: 1200px; margin: 0 auto;
+    padding: 100px 48px 60px; gap: 80px;
+  }
+  .hero-status {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--lime); background: rgba(188,255,92,0.08); border: 1px solid rgba(188,255,92,0.20);
+    padding: 7px 14px; border-radius: 999px; margin-bottom: 30px;
+  }
+  .hero-status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--lime); box-shadow: 0 0 8px var(--lime);
+    animation: pulse 2.4s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.35;transform:scale(0.65);} }
+  .hero-greeting { font-size: 15px; font-weight: 500; color: var(--dim); letter-spacing: 0.02em; margin-bottom: 10px; }
+  .hero-name {
+    font-size: clamp(52px,6vw,80px); font-weight: 900;
+    letter-spacing: -0.04em; line-height: 0.93; margin-bottom: 22px;
+  }
+  .hero-name .grad { background: var(--grad1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .hero-bio { font-size: 17px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; max-width: 480px; }
+  .hero-bio strong { color: var(--text); font-weight: 600; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+  .btn-glow {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 14px; font-weight: 700; padding: 14px 28px; border-radius: 14px;
+    background: var(--grad1); color: #060e18; text-decoration: none;
+    box-shadow: 0 8px 32px rgba(255,207,52,0.36);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+  .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(255,207,52,0.46); }
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 14px; font-weight: 600; padding: 14px 24px; border-radius: 14px;
+    background: rgba(255,255,255,0.044); border: 1px solid var(--border2);
+    color: var(--text); text-decoration: none; backdrop-filter: blur(12px);
+    transition: background 180ms, border 180ms, transform 180ms;
+  }
+  .btn-outline:hover { background: rgba(255,255,255,0.09); border-color: var(--border3); transform: translateY(-2px); }
+  .hero-skills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-chip {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 10px;
+    background: rgba(255,255,255,0.050); border: 1px solid var(--border); color: var(--muted);
+    transition: border-color 160ms, color 160ms;
+  }
+  .skill-chip:hover { border-color: rgba(255,255,255,0.18); color: var(--text); }
+  .skill-chip .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* RADAR */
+  .hero-right { display: flex; align-items: center; justify-content: center; position: relative; }
+  .radar-wrap { position: relative; width: 380px; height: 380px; flex-shrink: 0; }
+  .radar-ring {
+    position: absolute; border-radius: 50%; border: 1px solid rgba(188,255,92,0.12);
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+  }
+  .radar-ring:nth-child(1){ width:100%; height:100%; }
+  .radar-ring:nth-child(2){ width:72%;  height:72%;  border-color:rgba(188,255,92,0.17); }
+  .radar-ring:nth-child(3){ width:46%;  height:46%;  border-color:rgba(188,255,92,0.22); }
+  .radar-ring:nth-child(4){ width:22%;  height:22%;  border-color:rgba(188,255,92,0.30); background:rgba(188,255,92,0.06); }
+  .radar-crosshair { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:100%; height:100%; }
+  .radar-crosshair::before,.radar-crosshair::after { content:""; position:absolute; background:rgba(188,255,92,0.09); }
+  .radar-crosshair::before { width:100%; height:1px; top:50%; transform:translateY(-50%); }
+  .radar-crosshair::after  { height:100%; width:1px; left:50%; transform:translateX(-50%); }
+  .radar-sweep { position:absolute; width:100%; height:100%; top:0; left:0; border-radius:50%; overflow:hidden; }
+  .radar-sweep::after {
+    content:""; position:absolute; top:50%; left:50%; width:50%; height:50%;
+    transform-origin:top left; animation:sweepRot 3s linear infinite;
+    background: conic-gradient(from -90deg at 0% 0%, transparent 0deg, rgba(188,255,92,0.04) 60deg, rgba(188,255,92,0.40) 90deg, transparent 91deg);
+  }
+  @keyframes sweepRot { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  .blip {
+    position:absolute; width:7px; height:7px; border-radius:50%;
+    background:var(--lime); box-shadow:0 0 0 2px rgba(188,255,92,0.25),0 0 10px rgba(188,255,92,0.6);
+    transform:translate(-50%,-50%); animation:blip 3s ease infinite;
+  }
+  @keyframes blip { 0%,100%{opacity:1;transform:translate(-50%,-50%) scale(1);} 50%{opacity:0.2;transform:translate(-50%,-50%) scale(0.55);} }
+  .blip-yellow { background:var(--yellow); box-shadow:0 0 0 2px rgba(255,207,52,0.25),0 0 10px rgba(255,207,52,0.6); }
+  .blip-blue   { background:var(--blue);   box-shadow:0 0 0 2px rgba(91,163,255,0.25),0 0 10px rgba(91,163,255,0.6); }
+  .blip-label  { position:absolute; top:-18px; left:10px; font-size:9px; font-weight:700; letter-spacing:0.06em; color:var(--lime); white-space:nowrap; opacity:0.8; }
+  .radar-stat {
+    position:absolute; background:rgba(8,16,28,0.90); border:1px solid var(--border2);
+    border-radius:12px; padding:12px 16px; backdrop-filter:blur(16px); white-space:nowrap;
+    box-shadow:0 8px 28px rgba(0,0,0,0.35);
+  }
+  .radar-stat-val { font-size:20px; font-weight:800; letter-spacing:-0.04em; line-height:1; }
+  .radar-stat-lbl { font-size:10px; font-weight:600; color:var(--dim); letter-spacing:0.08em; text-transform:uppercase; margin-top:3px; }
+
+  /* METRICS */
+  .metrics-strip {
+    position:relative; z-index:1; max-width:1200px; margin:0 auto;
+    padding:0 48px 100px; display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+  }
+  .metric-card {
+    background:var(--panel); border:1px solid var(--border); border-radius:18px;
+    padding:24px 22px; backdrop-filter:blur(16px);
+    transition:border-color 200ms, transform 200ms; position:relative; overflow:hidden;
+  }
+  .metric-card::after { content:""; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.10),transparent); }
+  .metric-card:hover { border-color:var(--border2); transform:translateY(-2px); }
+  .metric-icon { font-size:22px; margin-bottom:14px; }
+  .metric-val  { font-size:28px; font-weight:800; letter-spacing:-0.04em; line-height:1; }
+  .metric-lbl  { font-size:12px; font-weight:500; color:var(--dim); margin-top:5px; }
+
+  /* PROFILE */
+  .profile-section {
+    position:relative; z-index:1; padding:80px 48px;
+    background:linear-gradient(180deg,rgba(91,163,255,0.022) 0%,transparent 100%);
+    border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  }
+  .profile-inner { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:320px 1fr; gap:80px; align-items:start; }
+  .profile-card {
+    background:var(--panel); border:1px solid var(--border2); border-radius:24px;
+    padding:36px 30px; backdrop-filter:blur(20px); text-align:center; position:sticky; top:84px;
+  }
+  .profile-avatar {
+    width:88px; height:88px; border-radius:28px; background:var(--grad1);
+    display:grid; place-items:center; font-size:38px; font-weight:900; color:#060e18;
+    margin:0 auto 18px;
+    box-shadow:0 0 0 3px rgba(255,207,52,0.18),0 16px 40px rgba(255,207,52,0.22);
+  }
+  .profile-name { font-size:22px; font-weight:800; letter-spacing:-0.03em; margin-bottom:6px; }
+  .profile-handle { font-size:13px; color:var(--dim); margin-bottom:16px; }
+  .profile-status-badge {
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:11px; font-weight:700; letter-spacing:0.10em; text-transform:uppercase;
+    color:var(--lime); background:rgba(188,255,92,0.08); border:1px solid rgba(188,255,92,0.18);
+    padding:6px 12px; border-radius:999px; margin-bottom:24px;
+  }
+  .profile-status-badge::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--lime); box-shadow:0 0 6px var(--lime); animation:pulse 2.4s ease infinite; }
+  .profile-links { display:flex; flex-direction:column; gap:8px; margin-bottom:22px; }
+  .plink {
+    display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:12px;
+    background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    color:var(--muted); font-size:12px; font-weight:600; text-decoration:none;
+    transition:background 150ms, color 150ms, border-color 150ms;
+  }
+  .plink:hover { background:rgba(255,255,255,0.09); color:var(--text); border-color:var(--border2); }
+  .plink svg { width:15px; height:15px; flex-shrink:0; }
+  .plink-arrow { margin-left:auto; font-size:12px; opacity:0.5; }
+  .profile-divider { height:1px; background:var(--border); margin:18px 0; }
+  .profile-stack-title { font-size:10px; font-weight:700; letter-spacing:0.13em; text-transform:uppercase; color:var(--dim); margin-bottom:10px; }
+  .profile-stack-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .pstk { font-size:11px; font-weight:600; color:var(--muted); background:rgba(255,255,255,0.04); border:1px solid var(--border); padding:7px 10px; border-radius:9px; text-align:center; }
+
+  .section-eyebrow { font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--yellow); margin-bottom:14px; }
+  .profile-headline { font-size:clamp(28px,3.5vw,42px); font-weight:800; letter-spacing:-0.03em; line-height:1.12; margin-bottom:20px; }
+  .profile-headline span { background:var(--grad1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .profile-desc { font-size:16px; color:var(--muted); line-height:1.75; margin-bottom:36px; max-width:580px; }
+  .expertise-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:36px; }
+  .expertise-item {
+    display:flex; align-items:center; gap:12px; padding:14px 16px;
+    background:rgba(255,255,255,0.033); border:1px solid var(--border); border-radius:14px;
+    transition:border-color 160ms;
+  }
+  .expertise-item:hover { border-color:var(--border2); }
+  .expertise-icon { font-size:20px; flex-shrink:0; }
+  .expertise-label { font-size:13px; font-weight:600; letter-spacing:-0.01em; }
+  .expertise-sub { font-size:11px; color:var(--dim); margin-top:2px; }
+  .skills-title { font-size:12px; font-weight:700; letter-spacing:0.10em; text-transform:uppercase; color:var(--dim); margin-bottom:16px; }
+  .skill-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+  .skill-name { font-size:13px; font-weight:600; width:118px; flex-shrink:0; }
+  .skill-track { flex:1; height:5px; background:rgba(255,255,255,0.07); border-radius:999px; overflow:hidden; }
+  .skill-fill { height:100%; border-radius:999px; transition:width 1.2s cubic-bezier(.22,.61,.36,1); width:0; }
+  .skill-pct { font-size:11px; font-weight:700; color:var(--dim); width:34px; text-align:right; flex-shrink:0; }
+
+  /* PROJECT */
+  .project-section { position:relative; z-index:1; padding:100px 48px; }
+  .project-inner { max-width:1200px; margin:0 auto; }
+  .project-header { margin-bottom:56px; }
+  .project-title { font-size:clamp(32px,4vw,52px); font-weight:800; letter-spacing:-0.03em; line-height:1.10; margin-bottom:14px; }
+  .project-sub { font-size:17px; color:var(--muted); max-width:520px; line-height:1.65; }
+  .project-card {
+    background:var(--panel); border:1px solid var(--border2); border-radius:28px;
+    overflow:hidden; backdrop-filter:blur(20px); box-shadow:0 40px 100px rgba(0,0,0,0.42); position:relative;
+  }
+  .project-card::before { content:""; position:absolute; top:0; left:0; right:0; height:2px; background:var(--grad1); }
+  .project-screen {
+    background:linear-gradient(145deg,#060f1c,#0b1e34,#061118); min-height:320px;
+    position:relative; overflow:hidden; display:grid; grid-template-columns:1.2fr 1fr;
+  }
+  .fake-map { position:relative; overflow:hidden; border-right:1px solid var(--border); min-height:320px; }
+  .fake-map::before {
+    content:""; position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(90deg,rgba(91,163,255,0.027) 0 1px,transparent 1px 48px),
+      repeating-linear-gradient(0deg,rgba(91,163,255,0.027) 0 1px,transparent 1px 48px),
+      radial-gradient(circle at 38% 55%,rgba(91,163,255,0.06) 0%,transparent 55%),
+      radial-gradient(circle at 70% 30%,rgba(188,255,92,0.04) 0%,transparent 40%);
+  }
+  .fake-map-label {
+    position:absolute; top:16px; left:16px;
+    font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--blue); background:rgba(8,16,28,0.7); border:1px solid rgba(91,163,255,0.20);
+    padding:5px 10px; border-radius:8px;
+  }
+  .fake-flight {
+    position:absolute; font-size:14px; color:var(--yellow);
+    animation:floatFlight linear infinite;
+    filter:drop-shadow(0 0 6px rgba(255,207,52,0.4));
+  }
+  @keyframes floatFlight { 0%{opacity:0;} 8%{opacity:1;} 90%{opacity:1;} 100%{opacity:0;} }
+  .fake-dot { position:absolute; width:5px; height:5px; border-radius:50%; background:var(--lime); box-shadow:0 0 6px var(--lime); animation:blip 2.5s ease infinite; }
+  .fake-panel { padding:20px 22px; display:flex; flex-direction:column; gap:12px; }
+  .fake-panel-header { font-size:11px; font-weight:700; letter-spacing:0.10em; text-transform:uppercase; color:var(--dim); padding-bottom:10px; border-bottom:1px solid var(--border); margin-bottom:2px; }
+  .fake-kpi { background:rgba(255,255,255,0.038); border:1px solid var(--border); border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:12px; }
+  .fake-kpi-ico { font-size:18px; flex-shrink:0; }
+  .fake-kpi-lbl { font-size:10px; color:var(--dim); font-weight:600; text-transform:uppercase; letter-spacing:0.07em; }
+  .fake-kpi-val { font-size:17px; font-weight:800; letter-spacing:-0.03em; margin-top:2px; }
+  .fake-bar { height:3px; border-radius:999px; background:rgba(255,255,255,0.08); overflow:hidden; margin-top:5px; }
+  .fake-bar-fill { height:100%; border-radius:999px; animation:growBar 3s ease-in-out infinite alternate; }
+  @keyframes growBar { from{width:30%;} to{width:90%;} }
+  .project-info { padding:32px 36px 36px; display:grid; grid-template-columns:1fr auto; gap:24px; align-items:center; }
+  .project-info-title { font-size:22px; font-weight:800; letter-spacing:-0.03em; margin-bottom:6px; }
+  .project-info-desc { font-size:14px; color:var(--muted); line-height:1.65; max-width:600px; }
+  .project-tags { display:flex; flex-wrap:wrap; gap:7px; margin-top:14px; }
+  .ptag { font-size:11px; font-weight:600; color:var(--muted); background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:4px 10px; border-radius:8px; }
+  .project-launch-btn {
+    display:flex; align-items:center; gap:9px; font-size:14px; font-weight:700;
+    padding:14px 26px; border-radius:14px; background:var(--grad1); color:#060e18;
+    text-decoration:none; white-space:nowrap; box-shadow:0 6px 24px rgba(255,207,52,0.30);
+    transition:transform 180ms, box-shadow 180ms; flex-shrink:0;
+  }
+  .project-launch-btn:hover { transform:translateY(-2px); box-shadow:0 12px 36px rgba(255,207,52,0.40); }
+
+  /* FEATURES */
+  .features-section { position:relative; z-index:1; padding:0 48px 100px; }
+  .features-inner { max-width:1200px; margin:0 auto; }
+  .features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .feat-card {
+    background:var(--panel); border:1px solid var(--border); border-radius:20px;
+    padding:26px 24px; backdrop-filter:blur(16px);
+    transition:border-color 200ms, transform 200ms, box-shadow 200ms; position:relative; overflow:hidden;
+  }
+  .feat-card::before { content:""; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.09),transparent); }
+  .feat-card:hover { border-color:var(--border2); transform:translateY(-3px); box-shadow:0 20px 50px rgba(0,0,0,0.30); }
+  .feat-icon-wrap { width:42px; height:42px; border-radius:13px; display:grid; place-items:center; font-size:20px; margin-bottom:16px; }
+  .feat-card h3 { font-size:15px; font-weight:700; letter-spacing:-0.015em; margin-bottom:7px; }
+  .feat-card p  { font-size:12.5px; color:var(--muted); line-height:1.65; }
+  .feat-badge { position:absolute; top:18px; right:18px; font-size:9px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; padding:3px 8px; border-radius:6px; }
+  .badge-live { background:rgba(188,255,92,0.12); color:var(--lime);   border:1px solid rgba(188,255,92,0.20); }
+  .badge-ml   { background:rgba(91,163,255,0.12); color:var(--blue);   border:1px solid rgba(91,163,255,0.20); }
+
+  /* TECH */
+  .tech-strip { position:relative; z-index:1; padding:60px 48px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:rgba(8,16,28,0.40); }
+  .tech-strip-inner { max-width:1200px; margin:0 auto; }
+  .tech-strip-label { font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--dim); text-align:center; margin-bottom:28px; }
+  .tech-pills { display:flex; flex-wrap:wrap; gap:9px; justify-content:center; }
+  .tech-pill { display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--muted); background:rgba(255,255,255,0.040); border:1px solid var(--border); padding:8px 15px; border-radius:12px; transition:background 150ms, color 150ms, border-color 150ms; }
+  .tech-pill:hover { background:rgba(255,255,255,0.08); color:var(--text); border-color:var(--border2); }
+  .tech-pill-ico { font-size:15px; }
+
+  /* CTA */
+  .cta-section { position:relative; z-index:1; padding:80px 48px 120px; }
+  .cta-inner {
+    max-width:760px; margin:0 auto; text-align:center;
+    background:var(--panel); border:1px solid var(--border2); border-radius:30px;
+    padding:64px 52px; backdrop-filter:blur(22px); box-shadow:0 40px 100px rgba(0,0,0,0.42); position:relative; overflow:hidden;
+  }
+  .cta-inner::before { content:""; position:absolute; top:0; left:15%; right:15%; height:2px; background:linear-gradient(90deg,transparent,rgba(255,207,52,0.6),transparent); }
+  .cta-inner::after { content:""; position:absolute; bottom:0; left:0; right:0; height:200px; background:radial-gradient(ellipse at 50% 120%,rgba(255,207,52,0.06) 0%,transparent 60%); pointer-events:none; }
+  .cta-badge { display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--yellow); background:rgba(255,207,52,0.09); border:1px solid rgba(255,207,52,0.20); padding:6px 14px; border-radius:999px; margin-bottom:24px; }
+  .cta-inner h2 { font-size:clamp(28px,4vw,46px); font-weight:800; letter-spacing:-0.03em; line-height:1.12; margin-bottom:16px; }
+  .cta-inner p  { font-size:16px; color:var(--muted); line-height:1.70; margin-bottom:36px; }
+
+  /* FOOTER */
+  footer { position:relative; z-index:1; border-top:1px solid var(--border); padding:28px 48px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .footer-left { display:flex; align-items:center; gap:12px; }
+  .footer-monogram { width:28px; height:28px; border-radius:8px; background:var(--grad1); display:grid; place-items:center; font-size:12px; font-weight:900; color:#060e18; }
+  footer p { font-size:12px; color:var(--dim); }
+  .footer-right { display:flex; align-items:center; gap:16px; }
+  footer a { font-size:12px; color:var(--dim); text-decoration:none; transition:color 150ms; }
+  footer a:hover { color:var(--text); }
+  .reveal { opacity:0; transform:translateY(28px); transition:opacity 600ms ease, transform 600ms ease; }
+  .reveal.in { opacity:1; transform:translateY(0); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .hero { grid-template-columns:1fr; gap:60px; min-height:auto; padding:110px 32px 60px; }
+    .hero-right { justify-content:flex-start; }
+    .radar-wrap { width:300px; height:300px; }
+    .metrics-strip { grid-template-columns:1fr 1fr; padding:0 32px 80px; }
+    .profile-inner { grid-template-columns:1fr; gap:48px; }
+    .profile-section { padding:80px 32px; }
+    .profile-card { position:static; }
+    .project-section,.features-section { padding-left:32px; padding-right:32px; }
+    .cta-section { padding:60px 32px 80px; }
+    footer { padding:24px 32px; }
+    nav { padding:0 24px; }
+  }
+  @media (max-width: 720px) {
+    .nav-divider,.nav-subtitle { display:none; }
+    .nav-pill { display:none; }
+    .hero { padding:100px 20px 48px; }
+    .metrics-strip { grid-template-columns:1fr 1fr; padding:0 20px 60px; }
+    .profile-section { padding:60px 20px; }
+    .project-section { padding:60px 20px; }
+    .project-screen { grid-template-columns:1fr; }
+    .fake-map { min-height:200px; }
+    .fake-panel { display:none; }
+    .project-info { grid-template-columns:1fr; }
+    .features-section { padding:0 20px 60px; }
+    .features-grid { grid-template-columns:1fr; }
+    .expertise-grid { grid-template-columns:1fr; }
+    .tech-strip { padding:50px 20px; }
+    .cta-section { padding:40px 20px 60px; }
+    .cta-inner { padding:40px 24px; }
+    footer { padding:20px; flex-direction:column; align-items:flex-start; }
+    .radar-wrap { width:260px; height:260px; }
+  }
+  </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="grid-overlay"></div>
+
+<nav>
+  <a class="nav-left" href="#">
+    <div class="nav-monogram">R</div>
+    <span class="nav-name">Rinku</span>
+    <div class="nav-divider"></div>
+    <span class="nav-subtitle">Python Developer</span>
+  </a>
+  <div class="nav-right">
+    <a class="nav-pill" href="#about">About</a>
+    <a class="nav-pill" href="#project">Project</a>
+    <a class="nav-pill" href="#contact">Contact</a>
+    <a class="nav-launch" href="#" id="nav-launch-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      Launch App
+    </a>
+  </div>
+</nav>
+
+<section>
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-status">
+        <div class="hero-status-dot"></div>
+        Open to opportunities
+      </div>
+      <p class="hero-greeting">Hi, I'm</p>
+      <h1 class="hero-name">Rinku<br><span class="grad">Developer.</span></h1>
+      <p class="hero-bio">
+        <strong>Python Developer</strong> building real-world platforms at the intersection of
+        <strong>data engineering, cloud infrastructure, and machine learning.</strong>
+        Currently shipping the Aviation Intelligence Platform — India's live flight intelligence dashboard.
+      </p>
+      <div class="hero-actions">
+        <a class="btn-glow" href="#project">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          See My Work
+        </a>
+        <a class="btn-outline" href="https://www.linkedin.com/in/rinkuuu/" target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2zm2-3a2 2 0 100-4 2 2 0 000 4z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+      <div class="hero-skills">
+        <div class="skill-chip"><span class="dot" style="background:#3572A5"></span>Python</div>
+        <div class="skill-chip"><span class="dot" style="background:#ff4b4b"></span>Streamlit</div>
+        <div class="skill-chip"><span class="dot" style="background:#FF9D00"></span>AWS EC2</div>
+        <div class="skill-chip"><span class="dot" style="background:#0089D6"></span>Azure</div>
+        <div class="skill-chip"><span class="dot" style="background:#e95420"></span>Linux</div>
+        <div class="skill-chip"><span class="dot" style="background:#bcff5c"></span>ML Pipeline</div>
+        <div class="skill-chip"><span class="dot" style="background:#5ba3ff"></span>REST APIs</div>
+        <div class="skill-chip"><span class="dot" style="background:#336791"></span>SQLite / DB</div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="radar-wrap">
+        <div class="radar-ring"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-crosshair"></div>
+        <div class="radar-sweep"></div>
+        <div class="blip blip-yellow" style="top:32%;left:58%;animation-delay:0.0s"><span class="blip-label">AI6E &middot; DEL</span></div>
+        <div class="blip"            style="top:55%;left:38%;animation-delay:0.8s"><span class="blip-label">6E241 &middot; BOM</span></div>
+        <div class="blip blip-blue"  style="top:42%;left:70%;animation-delay:1.6s"></div>
+        <div class="blip"            style="top:68%;left:55%;animation-delay:0.4s"><span class="blip-label">SG103 &middot; HYD</span></div>
+        <div class="blip blip-yellow"style="top:28%;left:34%;animation-delay:2.1s"></div>
+        <div class="blip blip-blue"  style="top:62%;left:26%;animation-delay:1.0s"></div>
+        <div class="radar-stat" style="bottom:-14px;right:-24px;">
+          <div class="radar-stat-val" style="color:var(--yellow)">247</div>
+          <div class="radar-stat-lbl">Active Flights</div>
+        </div>
+        <div class="radar-stat" style="top:8px;left:-28px;">
+          <div class="radar-stat-val" style="color:var(--lime)">Live</div>
+          <div class="radar-stat-lbl">AirLabs Feed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="metrics-strip" id="about">
+  <div class="metric-card reveal">
+    <div class="metric-icon">&#129514;</div>
+    <div class="metric-val" style="color:var(--lime)">64</div>
+    <div class="metric-lbl">Tests Passing &middot; 0 CVEs</div>
+  </div>
+  <div class="metric-card reveal">
+    <div class="metric-icon">&#9992;&#65039;</div>
+    <div class="metric-val" style="color:var(--yellow)">67+</div>
+    <div class="metric-lbl">Indian Airports Tracked</div>
+  </div>
+  <div class="metric-card reveal">
+    <div class="metric-icon">&#9889;</div>
+    <div class="metric-val" style="color:var(--blue)">7</div>
+    <div class="metric-lbl">Dashboard Modules</div>
+  </div>
+  <div class="metric-card reveal">
+    <div class="metric-icon">&#129302;</div>
+    <div class="metric-val" style="color:var(--teal)">ML</div>
+    <div class="metric-lbl">Delay Prediction Engine</div>
+  </div>
+</div>
+
+<section class="profile-section">
+  <div class="profile-inner">
+    <div class="profile-card reveal">
+      <div class="profile-avatar">R</div>
+      <div class="profile-name">Rinku</div>
+      <div class="profile-handle">@rinkuuu &middot; Python Developer</div>
+      <div class="profile-status-badge">Available for Work</div>
+      <div class="profile-links">
+        <a class="plink" href="https://www.linkedin.com/in/rinkuuu/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2zm2-3a2 2 0 100-4 2 2 0 000 4z"/></svg>
+          linkedin.com/in/rinkuuu
+          <span class="plink-arrow">&#8599;</span>
+        </a>
+      </div>
+      <div class="profile-divider"></div>
+      <div class="profile-stack-title">Core Stack</div>
+      <div class="profile-stack-grid">
+        <div class="pstk">Python 3.14</div>
+        <div class="pstk">Streamlit</div>
+        <div class="pstk">Pandas</div>
+        <div class="pstk">XGBoost</div>
+        <div class="pstk">SQLite</div>
+        <div class="pstk">Mapbox</div>
+        <div class="pstk">AWS EC2</div>
+        <div class="pstk">Azure</div>
+        <div class="pstk">Linux</div>
+        <div class="pstk">REST APIs</div>
+      </div>
+    </div>
+    <div class="profile-content reveal">
+      <div class="section-eyebrow">About me</div>
+      <h2 class="profile-headline">
+        Building platforms that<br><span>actually work</span> in production.
+      </h2>
+      <p class="profile-desc">
+        I'm a Python developer focused on building real-world projects end&#8209;to&#8209;end &mdash; from raw API integrations
+        and database design to ML pipelines and cloud deployment. I don't just write scripts; I architect
+        systems with thread safety, exponential back&#8209;off, circuit breakers, and full test coverage.
+        Currently shipping the <strong style="color:var(--text)">Aviation Intelligence Platform</strong> &mdash;
+        a production&#8209;grade live flight tracking and analytics dashboard for Indian airspace.
+      </p>
+      <div class="expertise-grid">
+        <div class="expertise-item">
+          <div class="expertise-icon">&#128295;</div>
+          <div>
+            <div class="expertise-label">Backend Engineering</div>
+            <div class="expertise-sub">Python &middot; SQLite &middot; APIs &middot; Threading</div>
+          </div>
+        </div>
+        <div class="expertise-item">
+          <div class="expertise-icon">&#9729;&#65039;</div>
+          <div>
+            <div class="expertise-label">Cloud Infrastructure</div>
+            <div class="expertise-sub">AWS EC2 &middot; Azure &middot; Linux &middot; Deployment</div>
+          </div>
+        </div>
+        <div class="expertise-item">
+          <div class="expertise-icon">&#129302;</div>
+          <div>
+            <div class="expertise-label">Machine Learning</div>
+            <div class="expertise-sub">XGBoost &middot; scikit-learn &middot; Feature Eng.</div>
+          </div>
+        </div>
+        <div class="expertise-item">
+          <div class="expertise-icon">&#127760;</div>
+          <div>
+            <div class="expertise-label">Web Development</div>
+            <div class="expertise-sub">Streamlit &middot; Mapbox GL JS &middot; HTML/CSS</div>
+          </div>
+        </div>
+      </div>
+      <div class="skills-title">Proficiency</div>
+      <div class="skill-row">
+        <span class="skill-name">Python</span>
+        <div class="skill-track"><div class="skill-fill" data-width="94" style="background:var(--grad1)"></div></div>
+        <span class="skill-pct">94%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Data Engineering</span>
+        <div class="skill-track"><div class="skill-fill" data-width="85" style="background:linear-gradient(90deg,#ffcf34,#bcff5c)"></div></div>
+        <span class="skill-pct">85%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Cloud / DevOps</span>
+        <div class="skill-track"><div class="skill-fill" data-width="80" style="background:linear-gradient(90deg,#5ba3ff,#2dd4bf)"></div></div>
+        <span class="skill-pct">80%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Machine Learning</span>
+        <div class="skill-track"><div class="skill-fill" data-width="78" style="background:linear-gradient(90deg,#bcff5c,#5ba3ff)"></div></div>
+        <span class="skill-pct">78%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Web / UI</span>
+        <div class="skill-track"><div class="skill-fill" data-width="72" style="background:linear-gradient(90deg,#ff9d35,#ffcf34)"></div></div>
+        <span class="skill-pct">72%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="project-section" id="project">
+  <div class="project-inner">
+    <div class="project-header reveal">
+      <div class="section-eyebrow">Featured Project</div>
+      <h2 class="project-title">Aviation Intelligence<br>Platform</h2>
+      <p class="project-sub">India's first production-grade live flight tracking dashboard with ML delay prediction and airport analytics.</p>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-screen">
+        <div class="fake-map">
+          <div class="fake-map-label">INDIA AIRSPACE &middot; LIVE</div>
+          <div class="fake-flight" style="top:25%;left:30%;animation-duration:12s;animation-delay:0s">&#9992;</div>
+          <div class="fake-flight" style="top:50%;left:55%;animation-duration:11s;animation-delay:2s;transform:rotate(-20deg)">&#9992;</div>
+          <div class="fake-flight" style="top:68%;left:40%;animation-duration:13s;animation-delay:4s;font-size:11px">&#9992;</div>
+          <div class="fake-flight" style="top:40%;left:72%;animation-duration:10s;animation-delay:1s;font-size:12px">&#9992;</div>
+          <div class="fake-flight" style="top:75%;left:70%;animation-duration:14s;animation-delay:6s;transform:rotate(-15deg)">&#9992;</div>
+          <div class="fake-dot" style="top:22%;left:27%;animation-delay:0.2s"></div>
+          <div class="fake-dot" style="top:45%;left:48%;animation-delay:0.8s;background:var(--yellow);box-shadow:0 0 6px var(--yellow)"></div>
+          <div class="fake-dot" style="top:65%;left:35%;animation-delay:1.5s;background:var(--blue);box-shadow:0 0 6px var(--blue)"></div>
+          <div class="fake-dot" style="top:35%;left:65%;animation-delay:0.5s"></div>
+          <div class="fake-dot" style="top:80%;left:60%;animation-delay:1.8s;background:var(--yellow);box-shadow:0 0 6px var(--yellow)"></div>
+        </div>
+        <div class="fake-panel">
+          <div class="fake-panel-header">Live Metrics</div>
+          <div class="fake-kpi">
+            <div class="fake-kpi-ico">&#9992;&#65039;</div>
+            <div>
+              <div class="fake-kpi-lbl">Active Flights</div>
+              <div class="fake-kpi-val" style="color:var(--yellow)">247</div>
+            </div>
+          </div>
+          <div class="fake-kpi">
+            <div class="fake-kpi-ico">&#9201;&#65039;</div>
+            <div>
+              <div class="fake-kpi-lbl">Avg Delay Risk</div>
+              <div class="fake-kpi-val" style="color:var(--red)">34%</div>
+              <div class="fake-bar"><div class="fake-bar-fill" style="background:var(--red)"></div></div>
+            </div>
+          </div>
+          <div class="fake-kpi">
+            <div class="fake-kpi-ico">&#128747;&#65039;</div>
+            <div>
+              <div class="fake-kpi-lbl">Congestion &middot; DEL</div>
+              <div class="fake-kpi-val" style="color:var(--lime)">High</div>
+              <div class="fake-bar"><div class="fake-bar-fill" style="background:var(--lime)"></div></div>
+            </div>
+          </div>
+          <div class="fake-kpi">
+            <div class="fake-kpi-ico">&#127782;&#65039;</div>
+            <div>
+              <div class="fake-kpi-lbl">Weather Alerts</div>
+              <div class="fake-kpi-val" style="color:var(--blue)">3 METAR</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="project-info">
+        <div>
+          <div class="project-info-title">Aviation Intelligence Platform</div>
+          <p class="project-info-desc">
+            Built end-to-end in Python &mdash; live AirLabs API feed, thread-safe SQLite snapshot engine, CheckWX METAR weather,
+            Mapbox GL JS satellite map with live flight overlays, and a hybrid XGBoost + rule-engine delay predictor.
+            64 passing tests. Zero CVEs. Production-ready architecture with write locks, exponential back-off, and async state.
+          </p>
+          <div class="project-tags">
+            <span class="ptag">Python 3.14</span>
+            <span class="ptag">Streamlit</span>
+            <span class="ptag">Mapbox GL JS</span>
+            <span class="ptag">XGBoost</span>
+            <span class="ptag">AirLabs API</span>
+            <span class="ptag">CheckWX</span>
+            <span class="ptag">SQLite</span>
+            <span class="ptag">Threading</span>
+          </div>
+        </div>
+        <a class="project-launch-btn launch-target" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Launch App
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features-section">
+  <div class="features-inner">
+    <div class="features-grid">
+      <div class="feat-card reveal">
+        <span class="feat-badge badge-live">Live</span>
+        <div class="feat-icon-wrap" style="background:rgba(255,207,52,0.10)">&#9992;&#65039;</div>
+        <h3>Live Flight Ops</h3>
+        <p>Real-time positions for all active Indian flights on a Mapbox satellite map. Auto-refreshes every 10 seconds via a zero-reload JS bridge.</p>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-badge badge-ml">ML</span>
+        <div class="feat-icon-wrap" style="background:rgba(91,163,255,0.10)">&#9889;</div>
+        <h3>Delay Prediction</h3>
+        <p>Hybrid XGBoost + rule engine scores every flight for delay risk. Factors: congestion, METAR severity, schedule pressure, route OTP, aircraft type.</p>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-badge badge-live">Live</span>
+        <div class="feat-icon-wrap" style="background:rgba(188,255,92,0.09)">&#128747;&#65039;</div>
+        <h3>Airport Analytics</h3>
+        <p>Congestion score, inbound density, low-altitude pressure, and 1-hour schedule demand per airport &mdash; bottleneck detection before cascades start.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon-wrap" style="background:rgba(255,101,87,0.10)">&#128680;</div>
+        <h3>Anomaly Alerts</h3>
+        <p>Auto-detects holding patterns, go-arounds, diversions, and stale contacts. Surfaces anomalies before ATC broadcasts them.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon-wrap" style="background:rgba(45,212,191,0.10)">&#129523;</div>
+        <h3>Passenger Tracker</h3>
+        <p>Search any active flight by call sign &mdash; see live position, estimated arrival, distance to destination, and predicted delay reason.</p>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-badge badge-live">Live</span>
+        <div class="feat-icon-wrap" style="background:rgba(255,207,52,0.09)">&#127782;&#65039;</div>
+        <h3>Weather Integration</h3>
+        <p>CheckWX METAR ingestion with deduplication and severity scoring. Layers directly into the delay prediction model and map overlays.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tech-strip">
+  <div class="tech-strip-inner">
+    <div class="tech-strip-label">Technologies used in this project</div>
+    <div class="tech-pills">
+      <div class="tech-pill"><span class="tech-pill-ico">&#128013;</span> Python 3.14</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#128202;</span> Streamlit</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#128506;&#65039;</span> Mapbox GL JS</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#128060;</span> Pandas</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#129302;</span> XGBoost</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#9881;&#65039;</span> scikit-learn</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#128452;&#65039;</span> SQLite</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#9992;&#65039;</span> AirLabs API</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#127782;&#65039;</span> CheckWX API</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#128274;</span> python-dotenv</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#129525;</span> Threading</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#9729;&#65039;</span> AWS EC2</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#128309;</span> Azure</div>
+      <div class="tech-pill"><span class="tech-pill-ico">&#128039;</span> Linux</div>
+    </div>
+  </div>
+</div>
+
+<section class="cta-section" id="contact">
+  <div class="cta-inner reveal">
+    <div class="cta-badge">&#9992; Ready for takeoff</div>
+    <h2>See India's airspace<br>in real time.</h2>
+    <p>Click below to open the Aviation Intelligence Platform. You'll need an AirLabs and CheckWX API key &mdash; see the README for setup.</p>
+    <a class="btn-glow launch-target" href="#" style="font-size:15px;padding:16px 36px;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      Launch Aviation Intelligence
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left">
+    <div class="footer-monogram">R</div>
+    <p>&copy; 2026 Rinku &middot; Python Developer &middot; All rights reserved.</p>
+  </div>
+  <div class="footer-right">
+    <a href="https://www.linkedin.com/in/rinkuuu/" target="_blank" rel="noopener">LinkedIn &#8599;</a>
+    <a href="#project">Projects</a>
+    <a href="#about">About</a>
+  </div>
+</footer>
+
+<script>
+var APP_URL = "";  // Set to your deployed URL, e.g. "https://your-app.streamlit.app"
+if (APP_URL) {
+  document.querySelectorAll('.launch-target, #nav-launch-btn').forEach(function(el) {
+    el.href = APP_URL; el.target = "_blank"; el.rel = "noopener";
+  });
+}
+
+(function() {
+  var canvas = document.getElementById("bg-canvas");
+  var ctx = canvas.getContext("2d");
+  var W, H, particles = [];
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize(); window.addEventListener("resize", resize);
+  function Particle() {
+    this.x = Math.random()*W; this.y = Math.random()*H;
+    this.vx = (Math.random()-0.5)*0.22; this.vy = (Math.random()-0.5)*0.22;
+    this.r = Math.random()*1.4+0.4; this.alpha = Math.random()*0.28+0.04;
+    var c = ["91,163,255","188,255,92","255,207,52","45,212,191"];
+    this.col = c[Math.floor(Math.random()*c.length)];
+  }
+  Particle.prototype.update = function() {
+    this.x+=this.vx; this.y+=this.vy;
+    if(this.x<0)this.x=W; if(this.x>W)this.x=0;
+    if(this.y<0)this.y=H; if(this.y>H)this.y=0;
+  };
+  Particle.prototype.draw = function() {
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+    ctx.fillStyle="rgba("+this.col+","+this.alpha+")"; ctx.fill();
+  };
+  for(var i=0;i<65;i++) particles.push(new Particle());
+  var _lastFrame = 0;
+  function frame(ts) {
+    // Cap at 30 fps to halve CPU use on the canvas
+    if(ts - _lastFrame < 33) { requestAnimationFrame(frame); return; }
+    _lastFrame = ts;
+    ctx.clearRect(0,0,W,H);
+    var len = particles.length;
+    for(var i=0;i<len;i++) {
+      for(var j=i+1;j<len;j++) {
+        var dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+        var d2=dx*dx+dy*dy;
+        if(d2<8100){ var d=Math.sqrt(d2); ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.strokeStyle="rgba(91,163,255,"+(0.05*(1-d/90))+")"; ctx.lineWidth=0.5; ctx.stroke(); }
+      }
+    }
+    particles.forEach(function(p){p.update();p.draw();}); requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting){e.target.classList.add("in");obs.unobserve(e.target);} });
+},{threshold:0.10});
+document.querySelectorAll(".reveal").forEach(function(el){obs.observe(el);});
+
+var sk = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){
+      e.target.querySelectorAll(".skill-fill").forEach(function(b){b.style.width=b.getAttribute("data-width")+"%";});
+      sk.unobserve(e.target);
+    }
+  });
+},{threshold:0.10});
+var sc = document.querySelector(".profile-content");
+if(sc) sk.observe(sc);
+</script>
+</body>
+</html>
