@@ -364,7 +364,7 @@ def generate_mapbox_base_html(
       --airport-soft: #9fd86a;
     }}
     * {{ box-sizing: border-box; }}
-    html, body {{ margin: 0; padding: 0; width: 100%; height: {height}px; overflow: hidden; background: var(--bg); }}
+    html, body {{ margin: 0; padding: 0; width: 100%; height: {height}px; min-height: 100vh; overflow: hidden; background: var(--bg); }}
     body {{ font-family: "SF Pro Display", "Segoe UI", Arial, sans-serif; }}
     #stage {{
       position: relative;
@@ -3038,6 +3038,128 @@ def generate_mapbox_base_html(
       }}
       .fids-table {{ color: #000 !important; }}
       .fids-close-btn, #fids-print-btn {{ display: none !important; }}
+    }}
+    /* ── Phone layout (≤600px) ──────────────────────────────────────── */
+    @media (max-width: 600px) {{
+      html, body {{ height: 100vh !important; overflow: hidden; }}
+      #stage {{ height: 100vh !important; }}
+      /* Brand: icon-only pill */
+      .brand-panel {{
+        min-width: 0;
+        width: 52px;
+        padding: 8px;
+        border-radius: 16px;
+        top: 8px;
+        left: 8px;
+        justify-content: center;
+        gap: 0;
+      }}
+      .brand-copy {{ display: none; }}
+      .brand-mark {{ width: 36px; height: 36px; font-size: 22px; border-radius: 12px; flex-shrink: 0; }}
+      /* Module + search strip */
+      .top-center-stack {{
+        top: 8px;
+        left: 68px;
+        right: 78px;
+        align-items: stretch;
+        gap: 5px;
+      }}
+      #top-stats {{ display: none; }}
+      .module-strip {{
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        gap: 4px;
+        justify-content: flex-start;
+      }}
+      .module-strip::-webkit-scrollbar {{ display: none; }}
+      .module-btn {{
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 6px 11px;
+        font-size: 11px;
+        border-radius: 10px;
+        min-width: 0;
+      }}
+      .top-center-stack .search-wrap {{
+        max-width: 100%;
+        width: 100%;
+      }}
+      .search-shell {{
+        height: 38px;
+        min-width: 0;
+        border-radius: 12px;
+      }}
+      /* Top-actions: freshness badge only */
+      .top-actions {{
+        top: 8px;
+        right: 8px;
+        gap: 0;
+        align-items: flex-end;
+      }}
+      .ac-filter-strip,
+      .tools-strip {{ display: none; }}
+      #freshness-badge {{
+        font-size: 10px;
+        padding: 5px 9px;
+        border-radius: 12px;
+      }}
+      /* Left rail: horizontal bottom drawer */
+      .left-rail {{
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-height: 280px;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 16px 16px 0 0;
+        padding: 10px 8px 12px;
+        gap: 8px;
+        max-width: 100%;
+        background: linear-gradient(180deg, rgba(10,14,22,0.98), rgba(8,12,18,0.98));
+        border-top: 1px solid rgba(255,255,255,0.10);
+        box-shadow: 0 -12px 32px rgba(0,0,0,0.4);
+      }}
+      .left-rail .rail-card {{
+        flex-shrink: 0;
+        width: 220px;
+        min-width: 180px;
+      }}
+      /* Right panel: full-width bottom sheet */
+      .right-panel {{
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        max-height: 70vh;
+        border-radius: 16px 16px 0 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+      }}
+      /* Alert feed: full width */
+      #alert-feed {{
+        right: 8px;
+        left: 8px;
+        top: 108px;
+        width: auto;
+        max-width: calc(100% - 16px);
+      }}
+      /* Filter and alerts panels: full width */
+      .filter-panel, .alerts-side-panel {{
+        left: 8px;
+        right: 8px;
+        width: auto;
+        max-width: calc(100% - 16px);
+      }}
     }}
   </style>
 </head>
