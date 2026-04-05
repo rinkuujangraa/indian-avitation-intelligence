@@ -6974,72 +6974,44 @@ def generate_mapbox_base_html(
     /* Height is fixed at {height}px — Streamlit sets the iframe height to the same value.
        No dynamic resize needed; it causes iframe height conflicts. */
 
-    // ── Mobile touch fix: disable Mapbox handlers while scrolling a panel ──
-    // Root cause: Mapbox GL JS registers touchmove on `window` during drag
-    // gestures and calls preventDefault(), blocking scroll in overlaid panels.
-    // Fix: on touchstart inside a scrollable panel, temporarily disable all
-    // Mapbox touch/drag/zoom handlers; re-enable on touchend/touchcancel.
+    // ── Mobile touch fix: disable Mapbox handlers while finger is on a panel ──
+    // stopPropagation() does NOT work — Mapbox listens on the canvas element
+    // directly. The only reliable fix is disabling dragPan / touchZoomRotate
+    // on touchstart inside a panel and re-enabling on touchend/touchcancel.
     (function() {{
-      var PANEL_SELECTOR = '.left-rail, .right-panel, .filter-panel, ' +
+      var PANEL_SELECTOR =
+        '.left-rail, .right-panel, .filter-panel, ' +
         '.alerts-side-panel, #asp-body, #sched-content, ' +
-        '.module-strip, #flight-board-overlay .fids-table-wrap, .search-dropdown';
+        '.search-dropdown, .module-strip, ' +
+        '#flight-board-overlay .fids-table-wrap';
 
-      function getMapHandlers() {{
-        if (!_mapRef) return null;
-        return [
-          _mapRef.dragPan,
-          _mapRef.dragRotate,
-          _mapRef.touchZoomRotate,
-          _mapRef.touchPitch,
-          _mapRef.scrollZoom,
-        ].filter(Boolean);
-      }}
+      var _touching = 0; // reference-count in case of nested panels
 
-      var _panelScrolling = false;
-      var _disableTimer = null;
-
-      function disableMapTouch() {{
-        if (_panelScrolling) return;
-        _panelScrolling = true;
-        var handlers = getMapHandlers();
-        if (handlers) handlers.forEach(function(h) {{ try {{ h.disable(); }} catch(e) {{}} }});
-        // Also disable pointer-events on canvas so no map clicks leak through
-        var canvas = document.querySelector('#map canvas');
-        if (canvas) canvas.style.pointerEvents = 'none';
-      }}
-
-      function enableMapTouch() {{
-        _panelScrolling = false;
-        var handlers = getMapHandlers();
-        if (handlers) handlers.forEach(function(h) {{ try {{ h.enable(); }} catch(e) {{}} }});
-        var canvas = document.querySelector('#map canvas');
-        if (canvas) canvas.style.pointerEvents = '';
+      function mapHandlers(action) {{
+        var m = window._mapRef;
+        if (!m) return;
+        try {{
+          m.dragPan[action]();
+          m.touchZoomRotate[action]();
+          m.dragRotate[action]();
+        }} catch(e) {{ /* map not yet ready — ignore */ }}
       }}
 
       document.addEventListener('touchstart', function(e) {{
-        if (_disableTimer) {{ clearTimeout(_disableTimer); _disableTimer = null; }}
-        // Walk up the DOM to see if touch started inside a panel
-        var el = e.target;
-        while (el && el !== document.body) {{
-          if (el.matches && el.matches(PANEL_SELECTOR)) {{
-            disableMapTouch();
-            return;
-          }}
-          el = el.parentElement;
+        if (e.target.closest(PANEL_SELECTOR)) {{
+          _touching++;
+          if (_touching === 1) mapHandlers('disable');
         }}
-        // Touch was on the map — make sure handlers are on
-        if (_panelScrolling) enableMapTouch();
-      }}, {{ passive: true }});
+      }}, {{ passive: true, capture: true }});
 
-      document.addEventListener('touchend', function() {{
-        if (!_panelScrolling) return;
-        // Small delay so momentum scroll completes before re-enabling map
-        _disableTimer = setTimeout(enableMapTouch, 120);
-      }}, {{ passive: true }});
-
-      document.addEventListener('touchcancel', function() {{
-        if (_panelScrolling) enableMapTouch();
-      }}, {{ passive: true }});
+      function onTouchEnd(e) {{
+        if (_touching > 0) {{
+          _touching--;
+          if (_touching === 0) mapHandlers('enable');
+        }}
+      }}
+      document.addEventListener('touchend',    onTouchEnd, {{ passive: true, capture: true }});
+      document.addEventListener('touchcancel', onTouchEnd, {{ passive: true, capture: true }});
     }})();
   </script>
 </body>
