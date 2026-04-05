@@ -3143,17 +3143,13 @@ def generate_mapbox_base_html(
         right: 0;
         width: 100%;
         max-width: 100%;
-        max-height: 72vh;
+        max-height: 70vh;
         border-radius: 16px 16px 0 0;
         border-left: none;
         border-right: none;
         border-bottom: none;
         touch-action: pan-y;
         overscroll-behavior-y: contain;
-        -webkit-overflow-scrolling: touch;
-      }}
-      .panel-inner {{
-        padding-bottom: 32px;
       }}
       /* Alert feed: full width */
       #alert-feed {{
@@ -6978,84 +6974,72 @@ def generate_mapbox_base_html(
     /* Height is fixed at {height}px — Streamlit sets the iframe height to the same value.
        No dynamic resize needed; it causes iframe height conflicts. */
 
-    // ── Mobile touch fix: stop Mapbox stealing scroll gestures from panels ──
-    // Strategy: on touchstart inside any scrollable panel, stopPropagation
-    // (non-passive) so Mapbox's document-level touchstart never fires.
-    // On touchmove we also call stopPropagation AND — only if the element
-    // is actually scrollable in that direction — preventDefault so the browser
-    // doesn't bounce to the map underneath.
+    // ── Mobile touch fix: disable Mapbox handlers while scrolling a panel ──
+    // Root cause: Mapbox GL JS registers touchmove on `window` during drag
+    // gestures and calls preventDefault(), blocking scroll in overlaid panels.
+    // Fix: on touchstart inside a scrollable panel, temporarily disable all
+    // Mapbox touch/drag/zoom handlers; re-enable on touchend/touchcancel.
     (function() {{
-      var SCROLL_SELECTORS = [
-        '.left-rail', '.right-panel', '.filter-panel',
-        '.alerts-side-panel', '#asp-body', '#sched-content',
-        '.search-dropdown', '#flight-board-overlay .fids-table-wrap',
-        '.module-strip', '.panel-inner'
-      ];
+      var PANEL_SELECTOR = '.left-rail, .right-panel, .filter-panel, ' +
+        '.alerts-side-panel, #asp-body, #sched-content, ' +
+        '.module-strip, #flight-board-overlay .fids-table-wrap, .search-dropdown';
 
-      function canScrollY(el) {{
-        return el.scrollHeight > el.clientHeight + 2;
+      function getMapHandlers() {{
+        if (!_mapRef) return null;
+        return [
+          _mapRef.dragPan,
+          _mapRef.dragRotate,
+          _mapRef.touchZoomRotate,
+          _mapRef.touchPitch,
+          _mapRef.scrollZoom,
+        ].filter(Boolean);
       }}
-      function canScrollX(el) {{
-        return el.scrollWidth > el.clientWidth + 2;
+
+      var _panelScrolling = false;
+      var _disableTimer = null;
+
+      function disableMapTouch() {{
+        if (_panelScrolling) return;
+        _panelScrolling = true;
+        var handlers = getMapHandlers();
+        if (handlers) handlers.forEach(function(h) {{ try {{ h.disable(); }} catch(e) {{}} }});
+        // Also disable pointer-events on canvas so no map clicks leak through
+        var canvas = document.querySelector('#map canvas');
+        if (canvas) canvas.style.pointerEvents = 'none';
       }}
 
-      function blockMapTouch(el) {{
-        // Non-passive touchstart — stop Mapbox from registering this touch at all
-        el.addEventListener('touchstart', function(e) {{
-          e.stopPropagation();
-        }}, {{ passive: false, capture: false }});
+      function enableMapTouch() {{
+        _panelScrolling = false;
+        var handlers = getMapHandlers();
+        if (handlers) handlers.forEach(function(h) {{ try {{ h.enable(); }} catch(e) {{}} }});
+        var canvas = document.querySelector('#map canvas');
+        if (canvas) canvas.style.pointerEvents = '';
+      }}
 
-        el.addEventListener('touchmove', function(e) {{
-          e.stopPropagation();
-          // Prevent map pan only when the panel has scroll room left
-          var t = e.changedTouches[0];
-          if (!el._touchStartY) return;
-          var dy = t.clientY - el._touchStartY;
-          var dx = t.clientX - (el._touchStartX || 0);
-          var isVertical = Math.abs(dy) >= Math.abs(dx);
-          if (isVertical) {{
-            var atTop    = el.scrollTop <= 0 && dy > 0;
-            var atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2 && dy < 0;
-            if (!atTop && !atBottom && canScrollY(el)) e.preventDefault();
-          }} else {{
-            var atLeft  = el.scrollLeft <= 0 && dx > 0;
-            var atRight = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 && dx < 0;
-            if (!atLeft && !atRight && canScrollX(el)) e.preventDefault();
+      document.addEventListener('touchstart', function(e) {{
+        if (_disableTimer) {{ clearTimeout(_disableTimer); _disableTimer = null; }}
+        // Walk up the DOM to see if touch started inside a panel
+        var el = e.target;
+        while (el && el !== document.body) {{
+          if (el.matches && el.matches(PANEL_SELECTOR)) {{
+            disableMapTouch();
+            return;
           }}
-        }}, {{ passive: false, capture: false }});
+          el = el.parentElement;
+        }}
+        // Touch was on the map — make sure handlers are on
+        if (_panelScrolling) enableMapTouch();
+      }}, {{ passive: true }});
 
-        el.addEventListener('touchstart', function(e) {{
-          var t = e.touches[0];
-          el._touchStartY = t.clientY;
-          el._touchStartX = t.clientX;
-        }}, {{ passive: true }});
+      document.addEventListener('touchend', function() {{
+        if (!_panelScrolling) return;
+        // Small delay so momentum scroll completes before re-enabling map
+        _disableTimer = setTimeout(enableMapTouch, 120);
+      }}, {{ passive: true }});
 
-        el.addEventListener('touchend', function(e) {{
-          e.stopPropagation();
-          el._touchStartY = null;
-          el._touchStartX = null;
-        }}, {{ passive: true }});
-      }}
-
-      function attachAll() {{
-        SCROLL_SELECTORS.forEach(function(sel) {{
-          document.querySelectorAll(sel).forEach(blockMapTouch);
-        }});
-      }}
-      document.addEventListener('DOMContentLoaded', attachAll);
-      if (document.readyState !== 'loading') attachAll();
-      var mo = new MutationObserver(function(mutations) {{
-        mutations.forEach(function(m) {{
-          m.addedNodes.forEach(function(node) {{
-            if (node.nodeType !== 1) return;
-            SCROLL_SELECTORS.forEach(function(sel) {{
-              if (node.matches && node.matches(sel)) blockMapTouch(node);
-              node.querySelectorAll && node.querySelectorAll(sel).forEach(blockMapTouch);
-            }});
-          }});
-        }});
-      }});
-      mo.observe(document.body || document.documentElement, {{ childList: true, subtree: true }});
+      document.addEventListener('touchcancel', function() {{
+        if (_panelScrolling) enableMapTouch();
+      }}, {{ passive: true }});
     }})();
   </script>
 </body>
