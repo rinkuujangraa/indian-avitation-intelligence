@@ -6331,6 +6331,7 @@ def generate_mapbox_base_html(
         map.addSource('trails-src', {{
           type: 'geojson',
           data: {{ type: 'FeatureCollection', features }},
+          lineMetrics: true,
         }});
         // Glow (wide, faint)
         map.addLayer({{
