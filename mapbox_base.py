@@ -1229,6 +1229,15 @@ def generate_mapbox_base_html(
       from {{ opacity: 0; transform: translateX(18px) scale(0.97); }}
       to   {{ opacity: 1; transform: translateX(0) scale(1); }}
     }}
+    @keyframes rpSlideUp {{
+      from {{ opacity: 0; transform: translateY(100%); }}
+      to   {{ opacity: 1; transform: translateY(0); }}
+    }}
+    @media (max-width: 600px) {{
+      .right-panel.rp-visible {{
+        animation: rpSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }}
+    }}
     .right-panel {{
       position: absolute;
       top: 132px;
@@ -3108,43 +3117,32 @@ def generate_mapbox_base_html(
         padding: 5px 9px;
         border-radius: 12px;
       }}
-      /* Left rail: vertical bottom drawer */
+      /* Left rail: horizontal bottom drawer */
       .left-rail {{
-        top: auto !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        height: auto;
-        max-height: 50vh;
-        flex-direction: column;
-        overflow-x: hidden;
-        overflow-y: scroll;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-height: 280px;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
-        touch-action: pan-y;
-        overscroll-behavior-y: contain;
-        border-radius: 18px 18px 0 0;
-        padding: 14px 12px 20px;
+        touch-action: pan-x;
+        overscroll-behavior-x: contain;
+        border-radius: 16px 16px 0 0;
+        padding: 10px 8px 12px;
         gap: 8px;
+        max-width: 100%;
         background: linear-gradient(180deg, rgba(10,14,22,0.98), rgba(8,12,18,0.98));
         border-top: 1px solid rgba(255,255,255,0.10);
         box-shadow: 0 -12px 32px rgba(0,0,0,0.4);
       }}
-      .left-rail::before {{
-        content: '';
-        display: block;
-        width: 36px;
-        height: 4px;
-        border-radius: 2px;
-        background: rgba(255,255,255,0.22);
-        margin: 0 auto 6px;
-        flex-shrink: 0;
-      }}
       .left-rail .rail-card {{
         flex-shrink: 0;
-        width: 100%;
-        min-width: 0;
+        width: 220px;
+        min-width: 180px;
       }}
       /* Right panel: full-width bottom sheet */
       .right-panel {{
@@ -3154,44 +3152,60 @@ def generate_mapbox_base_html(
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        height: 58vh;
-        max-height: 58vh;
-        border-radius: 18px 18px 0 0;
-        border-left: none;
-        border-right: none;
-        border-bottom: none;
-        display: none;
-        flex-direction: column;
-        overflow: hidden;
+        max-height: 72vh !important;
+        min-height: 0;
+        border-radius: 20px 20px 0 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
         touch-action: pan-y;
         overscroll-behavior-y: contain;
-      }}
-      .right-panel.rp-visible {{
-        display: flex !important;
-      }}
-      /* Give inner area all remaining height and make it scroll */
-      .right-panel .panel-inner {{
-        flex: 1;
-        min-height: 0;
-        overflow-y: scroll;
-        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: contain;
-        padding-bottom: 20px;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
       }}
-      /* Drag handle hint */
-      .right-panel .panel-top-accent {{
-        cursor: grab;
-        flex-shrink: 0;
-      }}
-      .right-panel .panel-top-accent::after {{
+      /* Drag handle above bottom sheet */
+      .right-panel::before {{
         content: '';
         display: block;
-        width: 36px;
+        width: 40px;
         height: 4px;
-        border-radius: 2px;
-        background: rgba(255,255,255,0.22);
-        margin: 6px auto 0;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.20);
+        margin: 10px auto 0;
+        flex-shrink: 0;
+      }}
+      /* Make inner content fit full width */
+      .panel-inner {{
+        padding: 12px 14px 16px !important;
+      }}
+      .panel-flight-hero {{
+        font-size: 28px !important;
+      }}
+      /* 2-col metrics grid on phone */
+      .metrics-grid-4 {{
+        grid-template-columns: 1fr 1fr !important;
+      }}
+      /* Route display full width */
+      .route-display {{
+        gap: 6px !important;
+      }}
+      .route-apt-code {{
+        font-size: 26px !important;
+      }}
+      /* Delay section full width */
+      .delay-row {{
+        flex-direction: column !important;
+        gap: 8px !important;
+      }}
+      /* Make close button bigger and easier to tap */
+      .panel-close {{
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 22px !important;
+      }}
+      /* Sparkline full width */
+      .sparkline-card {{
+        margin: 0 !important;
       }}
       /* Alert feed: full width */
       #alert-feed {{
@@ -4721,6 +4735,8 @@ def generate_mapbox_base_html(
       panel.classList.remove('rp-visible');
       void panel.offsetWidth;
       panel.classList.add('rp-visible');
+      // On mobile: scroll panel to top so user sees the header first
+      if (window.innerWidth <= 600) {{ panel.scrollTop = 0; }}
 
       panel.innerHTML = `
         <div class="panel-top-accent"></div>
@@ -7027,7 +7043,7 @@ def generate_mapbox_base_html(
     // on touchstart inside a panel and re-enabling on touchend/touchcancel.
     (function() {{
       var PANEL_SELECTOR =
-        '.left-rail, .right-panel, .right-panel .panel-inner, .filter-panel, ' +
+        '.left-rail, .right-panel, .filter-panel, ' +
         '.alerts-side-panel, #asp-body, #sched-content, ' +
         '.search-dropdown, .module-strip, ' +
         '#flight-board-overlay .fids-table-wrap';
