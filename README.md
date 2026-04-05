@@ -1,79 +1,81 @@
-# Aviation Intelligence Platform
+# ✈️ Aviation Intelligence Platform
 
-A real-time Indian aviation dashboard built with Streamlit, Mapbox GL JS, and an XGBoost + LightGBM delay prediction model.
+<div align="center">
 
-## Features
+**Live India flight tracking · ML delay prediction · Airport analytics**
 
-- **Live flight map** — Mapbox GL JS with per-aircraft icons, route arcs, and fuel/CO₂ estimates
-- **Delay prediction** — rule-based scoring blended with an ML ensemble (XGBoost + LightGBM) trained on OpenSky historical data
-- **Airport congestion** — AFRI (Arrival Flow Risk Index), schedule pressure, and traffic heatmap
-- **Weather overlay** — live METAR data via CheckWX with penalty scoring
-- **Anomaly detection** — holding patterns, go-arounds, diversions, and slow approaches
-- **Time-slider playback** — SQLite-backed 24 h flight history snapshots
-- **Route intelligence** — per-route congestion scores and hotspot delay minutes
+[![Python](https://img.shields.io/badge/Python-3.12-3572A5?style=flat&logo=python&logoColor=white)](https://python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.x-ff4b4b?style=flat&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![Railway](https://img.shields.io/badge/Deployed_on-Railway-0B0D0E?style=flat&logo=railway&logoColor=white)](https://web-production-39c38.up.railway.app)
+[![License](https://img.shields.io/badge/License-MIT-bcff5c?style=flat)](LICENSE)
+
+[**🚀 Live Demo**](https://web-production-39c38.up.railway.app) · [**📋 Project Page**](https://rinkuujangraa.github.io/indian-avitation-intelligence/)
+
+</div>
+
+---
+
+A self-learning project I built from scratch to understand how real production systems work — API clients, ML pipelines, cloud deployment, and everything in between. Covers all active Indian airspace in real time.
+
+## What it does
+
+| Module | Description |
+|---|---|
+| ✈️ **Live Flight Ops** | Real-time positions for all Indian flights on a Mapbox satellite map. Auto-refreshes every 30 s via a shared server-side cache |
+| 🤖 **Delay Prediction** | Hybrid XGBoost + rule engine scores every flight. Factors: congestion, METAR severity, route OTP, aircraft type, schedule pressure |
+| 🏢 **Airport Analytics** | Congestion score (AFRI), inbound density, low-altitude pressure, and 1-hour schedule demand per airport |
+| 🚨 **Anomaly Alerts** | Auto-detects holding patterns, go-arounds, diversions, and stale contacts |
+| 👤 **Passenger Tracker** | Search any flight by call sign — live position, ETA, distance to destination, predicted delay reason |
+| 🌦️ **Weather Integration** | CheckWX METAR ingestion with deduplication and severity scoring, feeds directly into the ML model |
+| 📊 **Flight Board** | Departure/arrival board for 10 major Indian airports |
+
+## Tech stack
+
+- **Backend** — Python 3.12, Streamlit, Pandas, SQLite, `concurrent.futures`
+- **Map** — Mapbox GL JS (satellite + flight layers, trail arcs, aircraft SVG icons)
+- **ML** — XGBoost, scikit-learn (feature engineering on live + METAR data)
+- **APIs** — AirLabs (live flights), CheckWX (METAR weather), OpenSky (fallback)
+- **Infra** — Railway (deployment), `python-dotenv`, thread-safe write locks, exponential back-off
 
 ## Quick start
 
 ```bash
-# 1. Clone
-git clone https://github.com/your-org/aviation-intelligence-platform
-cd aviation-intelligence-platform
+git clone https://github.com/rinkuujangraa/indian-avitation-intelligence.git
+cd indian-avitation-intelligence
 
-# 2. Create virtual environment
-python -m venv .venv
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
-
-# 3. Install dependencies
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# 4. Configure credentials
-cp .env.example .env
-# Edit .env and fill in your API keys (see below)
+cp .env.example .env   # fill in your API keys
 
-# 5. Run
 streamlit run app.py
 ```
 
 ## Environment variables
 
-Copy `.env.example` to `.env` and set the following:
-
-| Variable | Required | Description |
+| Variable | Required | Get it from |
 |---|---|---|
-| `AIRLABS_API_KEY` | ✅ | [AirLabs](https://airlabs.co/) API key for live flight data |
-| `MAPBOX_TOKEN` | ✅ | [Mapbox](https://account.mapbox.com/) public token (`pk.…`) for the map |
-| `CHECKWX_API_KEY` | Recommended | [CheckWX](https://www.checkwx.com/) key for live METAR weather |
-| `CESIUM_TOKEN` | Optional | [Cesium Ion](https://ion.cesium.com/) token for the 3-D satellite map |
-| `OPENSKY_USERNAME` | Training only | [OpenSky Network](https://opensky-network.org/) credentials for ML training |
-| `OPENSKY_PASSWORD` | Training only | See above |
+| `AIRLABS_API_KEY` | ✅ | [airlabs.co](https://airlabs.co/) |
+| `MAPBOX_TOKEN` | ✅ | [account.mapbox.com](https://account.mapbox.com/) |
+| `CHECKWX_API_KEY` | Recommended | [checkwx.com](https://www.checkwx.com/) |
+| `CESIUM_TOKEN` | Optional | [ion.cesium.com](https://ion.cesium.com/) |
+| `OPENSKY_USERNAME` / `OPENSKY_PASSWORD` | Training only | [opensky-network.org](https://opensky-network.org/) |
 
-The app runs without `CHECKWX_API_KEY` (weather panels show "Unavailable") and without `CESIUM_TOKEN` (falls back to Mapbox 2-D map).
-
-## ML model training (optional)
-
-A pre-trained model is not included in the repository. To train your own:
-
-```bash
-python delay_model.py --start 2024-01-01 --end 2024-12-31
-```
-
-This requires valid `OPENSKY_USERNAME` / `OPENSKY_PASSWORD` in `.env` and may take ~10 minutes.  
-The trained bundle is saved to `models/delay_lgbm.pkl`. The app lazily loads it on first run if present.
+The app runs without `CHECKWX_API_KEY` (weather panels show "Unavailable").
 
 ## Project structure
 
 ```
-app.py                  Streamlit entry point
+app.py                  Streamlit entry point + all UI modules
 analytics.py            Delay prediction, congestion, anomaly detection
-data_fetcher.py         AirLabs API client + flight cache
+data_fetcher.py         AirLabs API client + OpenSky fallback + cache
 mapbox_base.py          Mapbox GL JS map HTML generator
 tracker.py              In-memory + on-disk flight trail tracker
 snapshot_store.py       SQLite snapshot store (time-slider playback)
 weather_fetcher.py      CheckWX METAR client with circuit breaker
-delay_model.py          XGBoost + LightGBM training pipeline
-utils.py                Shared helpers (haversine, map builder)
+delay_model.py          XGBoost training pipeline
 aircraft_icons.py       SVG aircraft icon registry
-tests/                  Pytest test suite
+tests/                  Pytest test suite (64 passing)
 models/                 Trained model bundle (gitignored — train locally)
 ```
 
@@ -82,6 +84,14 @@ models/                 Trained model bundle (gitignored — train locally)
 ```bash
 python -m pytest tests/ -v
 ```
+
+## What I learned building this
+
+- How to design a thread-safe cache layer shared across Streamlit sessions
+- How to build a real ML feature pipeline from live API data (not clean CSVs)
+- How to handle API rate limits, timeouts, and fallbacks gracefully
+- How to deploy a Python app to Railway with environment secrets
+- Mapbox GL JS layer management and JavaScript ↔ Python communication via `html()` component
 
 ## License
 
