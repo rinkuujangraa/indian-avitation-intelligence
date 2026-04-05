@@ -1233,6 +1233,15 @@ def generate_mapbox_base_html(
       from {{ opacity: 0; transform: translateY(100%); }}
       to   {{ opacity: 1; transform: translateY(0); }}
     }}
+    #map-shield {{
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 49; /* below right-panel (auto stacking) but above map canvas */
+      background: transparent;
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+    }}
     @media (max-width: 600px) {{
       .right-panel.rp-visible {{
         animation: rpSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -3152,8 +3161,7 @@ def generate_mapbox_base_html(
         right: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        /* dvh = dynamic viewport height — excludes browser chrome (address bar, bottom bar) */
-        max-height: min(72dvh, 72vh) !important;
+        max-height: 72vh !important;
         min-height: 0;
         border-radius: 20px 20px 0 0 !important;
         border-left: none !important;
@@ -3162,28 +3170,22 @@ def generate_mapbox_base_html(
         touch-action: pan-y;
         overscroll-behavior-y: contain;
         -webkit-overflow-scrolling: touch;
-        overflow-y: scroll !important;
-        overflow-x: hidden !important;
-        /* hide the scrollbar track — the drag handle shows scroll intent */
-        scrollbar-width: none !important;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
       }}
-      .right-panel::-webkit-scrollbar {{
-        display: none !important;
-      }}
-      /* Drag handle pill */
+      /* Drag handle above bottom sheet */
       .right-panel::before {{
         content: '';
         display: block;
         width: 40px;
         height: 4px;
         border-radius: 999px;
-        background: rgba(255,255,255,0.22);
-        margin: 10px auto 4px;
+        background: rgba(255,255,255,0.20);
+        margin: 10px auto 0;
         flex-shrink: 0;
       }}
-      /* Inner content: tighter padding + safe-area bottom gap */
+      /* Make inner content fit full width */
       .panel-inner {{
-        padding: 10px 14px calc(env(safe-area-inset-bottom, 12px) + 24px) !important;
+        padding: 12px 14px 16px !important;
       }}
       .panel-flight-hero {{
         font-size: 28px !important;
@@ -3204,12 +3206,11 @@ def generate_mapbox_base_html(
         flex-direction: column !important;
         gap: 8px !important;
       }}
-      /* Close button — easy to tap */
+      /* Make close button bigger and easier to tap */
       .panel-close {{
         width: 40px !important;
         height: 40px !important;
         font-size: 22px !important;
-        flex-shrink: 0 !important;
       }}
       /* Sparkline full width */
       .sparkline-card {{
@@ -3312,6 +3313,10 @@ def generate_mapbox_base_html(
     </div>
     <div class="left-rail" id="left-rail"></div>
     <div class="right-panel glass-panel" id="right-panel"></div>
+    <!-- Transparent shield: sits above the map, below the panel.
+         Blocks ALL touch/click on the map while a mobile bottom sheet is open.
+         Tapping the shield closes the panel (feels like a backdrop dismiss). -->
+    <div id="map-shield"></div>
   </div>
   <!-- Alerts side panel -->
   <div id="alerts-side-panel" class="alerts-side-panel glass-panel">
@@ -4743,8 +4748,17 @@ def generate_mapbox_base_html(
       panel.classList.remove('rp-visible');
       void panel.offsetWidth;
       panel.classList.add('rp-visible');
-      // On mobile: scroll panel to top so user sees the header first
-      if (window.innerWidth <= 600) {{ panel.scrollTop = 0; }}
+      // On mobile: show the map shield so touches on the map area
+      // can't reach the Mapbox canvas and interfere with panel scroll.
+      // Tapping the shield closes the panel (backdrop-dismiss UX).
+      if (window.innerWidth <= 600) {{
+        panel.scrollTop = 0;
+        const shield = document.getElementById('map-shield');
+        if (shield) {{
+          shield.style.display = 'block';
+          shield.onclick = function() {{ hideRightPanel(); }};
+        }}
+      }}
 
       panel.innerHTML = `
         <div class="panel-top-accent"></div>
@@ -5018,6 +5032,8 @@ def generate_mapbox_base_html(
       panel.style.display = 'none';
       panel.innerHTML = '';
       _cameraFollow = false;
+      const shield = document.getElementById('map-shield');
+      if (shield) shield.style.display = 'none';
     }}
 
     // ── SDF icon registration ──────────────────────────────────────────────────
