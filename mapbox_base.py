@@ -3070,6 +3070,8 @@ def generate_mapbox_base_html(
         overflow-y: hidden;
         scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        overscroll-behavior-x: contain;
         flex-wrap: nowrap;
         gap: 4px;
         justify-content: flex-start;
@@ -3118,6 +3120,8 @@ def generate_mapbox_base_html(
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        overscroll-behavior-x: contain;
         border-radius: 16px 16px 0 0;
         padding: 10px 8px 12px;
         gap: 8px;
@@ -3144,6 +3148,8 @@ def generate_mapbox_base_html(
         border-left: none;
         border-right: none;
         border-bottom: none;
+        touch-action: pan-y;
+        overscroll-behavior-y: contain;
       }}
       /* Alert feed: full width */
       #alert-feed {{
@@ -3159,6 +3165,8 @@ def generate_mapbox_base_html(
         right: 8px;
         width: auto;
         max-width: calc(100% - 16px);
+        touch-action: pan-y;
+        overscroll-behavior-y: contain;
       }}
     }}
   </style>
@@ -6965,6 +6973,47 @@ def generate_mapbox_base_html(
   <script>
     /* Height is fixed at {height}px — Streamlit sets the iframe height to the same value.
        No dynamic resize needed; it causes iframe height conflicts. */
+
+    // ── Mobile touch fix: stop Mapbox stealing scroll gestures from panels ──
+    (function() {{
+      var SCROLL_SELECTORS = [
+        '.left-rail', '.right-panel', '.filter-panel',
+        '.alerts-side-panel', '#asp-body', '#sched-content',
+        '.search-dropdown', '#flight-board-overlay .fids-table-wrap',
+        '.module-strip'
+      ];
+      function blockMapTouch(el) {{
+        el.addEventListener('touchstart', function(e) {{
+          e.stopPropagation();
+        }}, {{ passive: true }});
+        el.addEventListener('touchmove', function(e) {{
+          e.stopPropagation();
+        }}, {{ passive: true }});
+        el.addEventListener('touchend', function(e) {{
+          e.stopPropagation();
+        }}, {{ passive: true }});
+      }}
+      function attachAll() {{
+        SCROLL_SELECTORS.forEach(function(sel) {{
+          document.querySelectorAll(sel).forEach(blockMapTouch);
+        }});
+      }}
+      // Run immediately + watch for dynamically added elements
+      document.addEventListener('DOMContentLoaded', attachAll);
+      if (document.readyState !== 'loading') attachAll();
+      var mo = new MutationObserver(function(mutations) {{
+        mutations.forEach(function(m) {{
+          m.addedNodes.forEach(function(node) {{
+            if (node.nodeType !== 1) return;
+            SCROLL_SELECTORS.forEach(function(sel) {{
+              if (node.matches && node.matches(sel)) blockMapTouch(node);
+              node.querySelectorAll && node.querySelectorAll(sel).forEach(blockMapTouch);
+            }});
+          }});
+        }});
+      }});
+      mo.observe(document.body || document.documentElement, {{ childList: true, subtree: true }});
+    }})();
   </script>
 </body>
 </html>
