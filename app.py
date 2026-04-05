@@ -152,9 +152,9 @@ def _fetch_live_positions(region: str, _tick: int) -> pd.DataFrame:
     return _shared_flight_cache(region, _tick)
 
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(ttl=1800, show_spinner=False)
 def _fetch_airport_schedules_cached(airport_code: str) -> tuple[object, object]:
-    """Fetch arrival+departure schedules for one airport; cached for 15 min."""
+    """Fetch arrival+departure schedules for one airport; cached for 30 min."""
     arr = get_airport_schedules(airport_code, direction="arrival")
     dep = get_airport_schedules(airport_code, direction="departure")
     return arr, dep
@@ -1739,7 +1739,7 @@ pre_selected_row = pre_selected_matches.iloc[0] if not pre_selected_matches.empt
 _need_predictions = active_module in {
     "delay_prediction", "passenger_view", "alerts", "live_ops",
 }
-_need_schedule    = True  
+_need_schedule    = active_module in {"delay_prediction", "passenger_view", "alerts", "flight_board"}
 _need_weather     = active_module in {"delay_prediction", "passenger_view", "alerts"}
 _need_anomaly     = active_module in {"alerts"}
 
@@ -1766,7 +1766,7 @@ now_ts = int(time.time())
 
 flight_schedule_lookup: dict[str, dict] = {}
 if _need_schedule:
-    _SCHED_BUDGET = 10
+    _SCHED_BUDGET = 5
     _fetch_airports = schedule_airports[:_SCHED_BUDGET]
 
     def _fetch_one_airport(airport_code: str) -> tuple[str, pd.DataFrame, pd.DataFrame]:
