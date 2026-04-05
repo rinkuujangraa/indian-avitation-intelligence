@@ -131,15 +131,25 @@ _is_mobile = any(k in _ua for k in ("mobile", "android", "iphone", "ipod"))
 DASHBOARD_HEIGHT = 680 if _is_mobile else 1080
 
 
-@st.cache_data(ttl=60, show_spinner=False)
-def fetch_flights(region: str) -> pd.DataFrame:
-    return get_flight_data(region=region).copy()
-
-
+# ── Shared flight data cache ───────────────────────────────────────────────────
+# One server-side cache shared by all users and all code paths.
+# Both the initial page load and the live-update fragment read from this
+# so only ONE AirLabs API call is made per 30s regardless of user count.
 @st.cache_data(ttl=30, show_spinner=False)
-def _fetch_live_positions(region: str, _tick: int) -> pd.DataFrame:
-    """Short-TTL live position fetch used by the autonomous fragment."""
+def _shared_flight_cache(region: str, _tick: int) -> pd.DataFrame:
+    """Single source of truth for flight data — all users share this cache bucket."""
     return get_flight_data(region=region).copy()
+
+
+def fetch_flights(region: str) -> pd.DataFrame:
+    _tick = int(time.time()) // 30   # 30-s bucket
+    return _shared_flight_cache(region, _tick)
+
+
+def _fetch_live_positions(region: str, _tick: int) -> pd.DataFrame:
+    """Live position fetch — re-uses the shared cache, no extra API call."""
+    _tick = int(time.time()) // 30
+    return _shared_flight_cache(region, _tick)
 
 
 @st.cache_data(ttl=900, show_spinner=False)

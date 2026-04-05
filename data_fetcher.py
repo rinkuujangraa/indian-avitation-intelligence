@@ -423,7 +423,7 @@ def get_flight_data(
                         ),
                         event_key=f"airlabs_api_error_{err_code}",
                     )
-                return pd.DataFrame(columns=KEEP_COLUMNS)
+                return _fetch_opensky_fallback(region)
 
             flights = data.get("response", [])
 
@@ -488,11 +488,103 @@ def get_flight_data(
             logger.info(f"Waiting {wait}s before retry...")
             time.sleep(wait)
 
-    logger.error("All retry attempts failed. Returning empty DataFrame.")
+    logger.error("All retry attempts failed. Trying OpenSky fallback...")
+    fallback_df = _fetch_opensky_fallback(region)
+    if not fallback_df.empty:
+        return fallback_df
     return pd.DataFrame(columns=KEEP_COLUMNS)
 
 
-def get_airport_schedules(
+# ── OpenSky live REST fallback ─────────────────────────────────────────────────
+# Used automatically when AirLabs returns empty (quota exhausted / error).
+# OpenSky is free & unauthenticated for ~400 req/day; credentials from .env
+# raise that limit significantly.
+_OPENSKY_BBOX = {
+    "india":  (8.0, 68.0, 37.0, 97.0),   # lamin, lomin, lamax, lomax
+    "world":  None,
+    "europe": (36.0, -15.0, 72.0, 40.0),
+    "south_asia": (5.0, 60.0, 40.0, 95.0),
+}
+
+def _fetch_opensky_fallback(region: str = "india") -> pd.DataFrame:
+    """
+    Fetch live state vectors from OpenSky REST API.
+    Returns a DataFrame with the same columns as AirLabs output so the
+    rest of the app works without modification.
+    """
+    bbox = _OPENSKY_BBOX.get(region, _OPENSKY_BBOX["india"])
+    url = "https://opensky-network.org/api/states/all"
+    params: dict = {}
+    if bbox:
+        params = {"lamin": bbox[0], "lomin": bbox[1], "lamax": bbox[2], "lomax": bbox[3]}
+    auth = None
+    usr = os.getenv("OPENSKY_USERNAME")
+    pwd = os.getenv("OPENSKY_PASSWORD")
+    if usr and pwd:
+        auth = (usr, pwd)
+    try:
+        resp = requests.get(url, params=params, auth=auth, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        states = data.get("states") or []
+        if not states:
+            return pd.DataFrame(columns=KEEP_COLUMNS)
+        rows = []
+        for s in states:
+            # OpenSky state vector fields (indices):
+            # 0=icao24, 1=callsign, 2=origin_country, 3=time_position,
+            # 4=last_contact, 5=longitude, 6=latitude, 7=baro_altitude,
+            # 8=on_ground, 9=velocity, 10=true_track, 11=vertical_rate,
+            # 12=sensors, 13=geo_altitude, 14=squawk, 15=spi, 16=position_source
+            try:
+                callsign = (s[1] or "").strip()
+                if not callsign:
+                    continue
+                rows.append({
+                    "icao24":       s[0] or "",
+                    "flight_iata":  callsign,
+                    "flight_icao":  callsign,
+                    "flight":       callsign,
+                    "airline_iata": callsign[:2] if len(callsign) >= 2 else "",
+                    "airline_icao": callsign[:3] if len(callsign) >= 3 else "",
+                    "airline_code": callsign[:2] if len(callsign) >= 2 else "",
+                    "airline":      callsign[:2] if len(callsign) >= 2 else "Unknown",
+                    "lat":          float(s[6]) if s[6] is not None else None,
+                    "lng":          float(s[5]) if s[5] is not None else None,
+                    "altitude_ft":  round(float(s[7]) * 3.28084) if s[7] else None,
+                    "speed_kts":    round(float(s[9]) * 1.94384) if s[9] else None,
+                    "heading":      float(s[10]) if s[10] is not None else None,
+                    "vertical_speed": float(s[11]) if s[11] is not None else None,
+                    "on_ground":    bool(s[8]),
+                    "dep":          "",
+                    "arr":          "",
+                    "dep_iata":     "",
+                    "arr_iata":     "",
+                    "aircraft_icao": "",
+                    "aircraft":     "Unknown",
+                    "reg":          "",
+                    "status":       "en-route",
+                    "delayed":      0,
+                    "delayed_min":  0,
+                    "eta":          None,
+                    "family":       "narrow",
+                    "airline_name": callsign[:2] if len(callsign) >= 2 else "Unknown",
+                })
+            except Exception:
+                continue
+        if not rows:
+            return pd.DataFrame(columns=KEEP_COLUMNS)
+        df = pd.DataFrame(rows)
+        # Drop aircraft on ground
+        df = df[df["on_ground"] == False].copy()  # noqa: E712
+        df.drop(columns=["on_ground"], inplace=True, errors="ignore")
+        logger.info("OpenSky fallback: %d airborne flights", len(df))
+        return df
+    except Exception as exc:
+        logger.error("OpenSky fallback failed: %s", exc)
+        return pd.DataFrame(columns=KEEP_COLUMNS)
+
+
     airport_iata: str,
     direction: str = "arrival",
     max_retries: int = 2,
