@@ -756,6 +756,34 @@ def generate_mapbox_base_html(
       text-transform: uppercase;
       white-space: nowrap;
     }}
+    .credit-bar {{
+      position: absolute;
+      bottom: 10px;
+      left: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: auto;
+      z-index: 10;
+    }}
+    .credit-bar a {{
+      color: rgba(244,247,251,0.38);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }}
+    .credit-bar a:hover {{
+      color: rgba(244,247,251,0.75);
+    }}
+    .credit-sep {{
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(244,247,251,0.2);
+    }}
     .top-actions {{
       position: absolute;
       top: 14px;
@@ -3335,7 +3363,7 @@ def generate_mapbox_base_html(
       <div class="brand-mark"><svg width="42" height="42" viewBox="24 30 300 300" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mbx-ic-a" x1="32" y1="40" x2="260" y2="300" gradientUnits="userSpaceOnUse"><stop stop-color="#FFC14D"/><stop offset="1" stop-color="#FF9F1A"/></linearGradient><linearGradient id="mbx-ic-d" x1="0" y1="0" x2="320" y2="320" gradientUnits="userSpaceOnUse"><stop stop-color="#121A26"/><stop offset="1" stop-color="#0A1018"/></linearGradient></defs><rect x="24" y="30" width="300" height="300" rx="72" fill="url(#mbx-ic-d)"/><path d="M112 246L176 88H228L292 246H239L224 207H180L166 246H112ZM194 163H210L202 140L194 163Z" fill="url(#mbx-ic-a)"/><path d="M94 212C120 167 163 136 219 120C243 113 267 110 291 110" stroke="#5CD2FF" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 18"/><path d="M274 98L309 111L283 139" stroke="#5CD2FF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="brand-copy">
         <div class="brand-title">Aviation Intelligence</div>
-        <div class="brand-subtitle">India OCC Surface</div>
+        <div class="brand-subtitle">Live India Airspace Analytics</div>
       </div>
     </div>
     <div class="top-center-stack">
@@ -3469,6 +3497,13 @@ def generate_mapbox_base_html(
     </div>
   </div>
   <div id="error-box"></div>
+  <div class="credit-bar">
+    <a href="https://github.com/rinkuujangraa/indian-avitation-intelligence" target="_blank" rel="noopener">GitHub</a>
+    <span class="credit-sep"></span>
+    <a href="https://linkedin.com/in/rinkuu-jangra" target="_blank" rel="noopener">LinkedIn</a>
+    <span class="credit-sep"></span>
+    <a href="https://web-production-39c38.up.railway.app" target="_blank" rel="noopener">Built by Rinku</a>
+  </div>
   </div>
 
   <script>
