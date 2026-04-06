@@ -69,6 +69,7 @@ st.markdown(
 <meta property="og:image" content="https://raw.githubusercontent.com/rinkuujangraa/indian-avitation-intelligence/main/static/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
+<meta name="author" content="Rinkuu Jangra" />
 <meta property="article:author" content="https://www.linkedin.com/in/rinkuuu/" />
 <meta property="article:published_time" content="2026-04-06T00:00:00+05:30" />
 <meta property="article:publisher" content="https://www.linkedin.com/in/rinkuuu/" />

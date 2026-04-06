@@ -33,6 +33,7 @@ META_BLOCK = """
     <meta property="og:url"              content="https://aviationintelligence.app" />
 
     <!-- Article metadata (author / publish date for LinkedIn) -->
+    <meta name="author"                        content="Rinkuu Jangra" />
     <meta property="article:author"           content="https://www.linkedin.com/in/rinkuuu/" />
     <meta property="article:published_time"   content="2026-04-06T00:00:00+05:30" />
     <meta property="article:publisher"        content="https://www.linkedin.com/in/rinkuuu/" />
@@ -56,7 +57,7 @@ def patch():
     with open(INDEX_PATH, "r", encoding="utf-8") as f:
         html = f.read()
 
-    if "article:author" in html:
+    if 'name="author"' in html:
         print("[inject_meta] index.html already patched — skipping.")
         return
 
