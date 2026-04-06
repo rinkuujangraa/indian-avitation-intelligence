@@ -20,6 +20,7 @@ META_BLOCK = """
     <!-- ── SEO / Social meta ── injected by inject_meta.py at build time ── -->
     <title>Aviation Intelligence · India Live Flight Tracker</title>
     <meta name="description" content="Real-time India flight tracking, ML delay prediction, airport congestion analytics and anomaly detection. Built with Python, Streamlit, XGBoost and Mapbox." />
+    <meta name="author" content="Rinku" />
 
     <!-- Open Graph -->
     <meta property="og:type"             content="article" />
@@ -30,10 +31,9 @@ META_BLOCK = """
     <meta property="og:image:width"      content="1200" />
     <meta property="og:image:height"     content="630" />
     <meta property="og:image:alt"        content="Aviation Intelligence Platform — Live Airspace Analytics" />
-    <meta property="og:url"              content="https://aviationintelligence.app" />
+    <meta property="og:url"              content="https://web-production-39c38.up.railway.app" />
 
     <!-- Article metadata (author / publish date for LinkedIn) -->
-    <meta name="author"                        content="Rinku" />
     <meta property="article:author"           content="https://www.linkedin.com/in/rinkuuu/" />
     <meta property="article:published_time"   content="2026-04-06T00:00:00+05:30" />
     <meta property="article:publisher"        content="https://www.linkedin.com/in/rinkuuu/" />
