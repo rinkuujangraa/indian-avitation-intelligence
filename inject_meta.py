@@ -56,7 +56,7 @@ def patch():
     with open(INDEX_PATH, "r", encoding="utf-8") as f:
         html = f.read()
 
-    if "og:title" in html:
+    if "article:author" in html:
         print("[inject_meta] index.html already patched — skipping.")
         return
 
