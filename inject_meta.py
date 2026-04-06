@@ -33,10 +33,10 @@ META_BLOCK = """
     <meta property="og:url"              content="https://aviationintelligence.app" />
 
     <!-- Article metadata (author / publish date for LinkedIn) -->
-    <meta name="author"                        content="Rinkuu Jangra" />
-    <meta property="article:author"           content="https://www.linkedin.com/in/rinkuuu/" />
-    <meta property="article:published_time"   content="2026-04-06T00:00:00+05:30" />
-    <meta property="article:publisher"        content="https://www.linkedin.com/in/rinkuuu/" />
+    <meta name="author"                        content="Rinku" />
+    <meta property="article:author"            content="https://www.linkedin.com/in/rinkuuu/" />
+    <meta property="article:published_time"    content="2026-04-06T00:00:00+05:30" />
+    <meta property="article:publisher"         content="https://www.linkedin.com/in/rinkuuu/" />
 
     <!-- Twitter / X card -->
     <meta name="twitter:card"        content="summary_large_image" />
