@@ -33,30 +33,10 @@ META_BLOCK = """
     <meta property="og:url"              content="https://aviationintelligence.app" />
 
     <!-- Article metadata (author / publish date for LinkedIn) -->
-    <meta name="author"                        content="Rinku" />
-    <meta property="article:author"           content="Rinku" />
+    <meta name="author"                        content="Rinkuu" />
+    <meta property="article:author"           content="https://www.linkedin.com/in/rinkuuu/" />
     <meta property="article:published_time"   content="2026-04-06T00:00:00+05:30" />
     <meta property="article:publisher"        content="https://www.linkedin.com/in/rinkuuu/" />
-
-    <!-- JSON-LD structured data — read by LinkedIn Post Inspector for author/date -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Aviation Intelligence · India Live Flight Tracker",
-      "description": "Real-time India flight tracking, ML delay prediction, airport congestion analytics and anomaly detection.",
-      "url": "https://web-production-39c38.up.railway.app",
-      "image": "https://raw.githubusercontent.com/rinkuujangraa/indian-avitation-intelligence/main/static/og.png",
-      "author": {
-        "@type": "Person",
-        "name": "Rinku",
-        "url": "https://www.linkedin.com/in/rinkuuu/"
-      },
-      "datePublished": "2026-04-06",
-      "applicationCategory": "DeveloperApplication",
-      "operatingSystem": "Web"
-    }
-    </script>
 
     <!-- Twitter / X card -->
     <meta name="twitter:card"        content="summary_large_image" />
@@ -77,9 +57,9 @@ def patch():
     with open(INDEX_PATH, "r", encoding="utf-8") as f:
         html = f.read()
 
-    if "article:author" in html:
+    if 'name="author"' in html:
         print("[inject_meta] index.html already patched — skipping.")
-        rpplication/ld+json
+        return
 
     # Replace the bare <title>Streamlit</title> and inject full meta block
     patched = html.replace(
