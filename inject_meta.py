@@ -31,7 +31,7 @@ META_BLOCK = """
     <meta property="og:image:width"      content="1200" />
     <meta property="og:image:height"     content="630" />
     <meta property="og:image:alt"        content="Aviation Intelligence Platform — Live Airspace Analytics" />
-    <meta property="og:url"              content="https://web-production-39c38.up.railway.app" />
+    <meta property="og:url"              content="https://aviationintelligence.app" />
 
     <!-- Article metadata (author / publish date for LinkedIn) -->
     <meta property="article:author"           content="https://www.linkedin.com/in/rinkuuu/" />
@@ -53,7 +53,7 @@ META_BLOCK = """
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "Aviation Intelligence \u00b7 India Live Flight Tracker",
-      "url": "https://web-production-39c38.up.railway.app",
+      "url": "https://aviationintelligence.app",
       "description": "Real-time India flight tracking, ML delay prediction, airport congestion analytics and anomaly detection.",
       "datePublished": "2026-04-06",
       "author": {
