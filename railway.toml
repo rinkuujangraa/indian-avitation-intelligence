@@ -1,5 +1,6 @@
 [build]
 builder = "NIXPACKS"
+buildCommand = "pip install -r requirements.txt && python3 inject_meta.py"
 
 [deploy]
 startCommand = "streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true"
